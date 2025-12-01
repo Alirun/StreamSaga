@@ -1,10 +1,11 @@
 # StreamSaga Architecture
 
 ## Overview
-StreamSaga is a Next.js application where stream viewers can propose and vote for projects/features to be developed live. The project is currently in the **UI Mock** phase, using client-side mock data to demonstrate core flows before backend integration.
+StreamSaga is a Next.js application where stream viewers can propose and vote for projects/features to be developed live. The project uses **Supabase Auth** for user management and client-side mock data for content (Topics/Proposals).
 
 ## Tech Stack
 - **Framework**: Next.js 15 (App Router)
+- **Backend**: Supabase (Auth)
 - **Styling**: TailwindCSS v4
 - **Language**: TypeScript
 - **Icons**: Lucide React
@@ -13,28 +14,37 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 ## Project Structure
 
 ```
-src/
-├── app/                 # App Router pages and layouts
-│   ├── (auth)/          # Authentication Pages (Route Group)
-│   │   ├── login/       # Sign In Page
-│   │   ├── signup/      # Sign Up Page
-│   │   └── layout.tsx   # Auth Layout (Centered)
-│   ├── admin/           # Admin Dashboard
-│   ├── propose/         # Proposal Creation Flow
-│   ├── topic/           # Topic Details
-│   ├── globals.css      # Global styles & Design System variables
-│   ├── layout.tsx       # Root layout with Navbar
-│   └── page.tsx         # Public Dashboard (Home)
-├── components/          # React components
-│   ├── ui/              # Reusable UI primitives (Button, Card, etc.)
-│   ├── logo.tsx         # Branding component
-│   ├── navbar.tsx       # Main navigation
-│   ├── proposal-card.tsx# Proposal display & voting logic
-│   └── topic-card.tsx   # Topic summary card
-└── lib/                 # Utilities and Data
-    ├── data.ts          # Mock Data (Topics, Proposals)
-    ├── types.ts         # TypeScript interfaces (Topic, Proposal, User)
-    └── utils.ts         # Helper functions (cn)
+.
+├── middleware.ts        # Root middleware for session management
+├── src/
+│   ├── app/                 # App Router pages and layouts
+│   │   ├── (auth)/          # Authentication Pages (Route Group)
+│   │   │   ├── login/       # Sign In Page
+│   │   │   ├── signup/      # Sign Up Page
+│   │   │   ├── actions.ts   # Auth Server Actions
+│   │   │   └── layout.tsx   # Auth Layout (Centered)
+│   │   ├── auth/
+│   │   │   └── callback/    # OAuth Callback Route
+│   │   ├── admin/           # Admin Dashboard
+│   │   ├── propose/         # Proposal Creation Flow
+│   │   ├── topic/           # Topic Details
+│   │   ├── globals.css      # Global styles & Design System variables
+│   │   ├── layout.tsx       # Root layout with Navbar
+│   │   └── page.tsx         # Public Dashboard (Home)
+│   ├── components/          # React components
+│   │   ├── ui/              # Reusable UI primitives
+│   │   ├── logo.tsx         # Branding component
+│   │   ├── navbar.tsx       # Main navigation (Auth aware)
+│   │   ├── proposal-card.tsx# Proposal display & voting logic
+│   │   └── topic-card.tsx   # Topic summary card
+│   └── lib/                 # Utilities and Data
+│       ├── supabase/        # Supabase Client Utilities
+│       │   ├── client.ts    # Browser Client
+│       │   ├── server.ts    # Server Client (Cookies)
+│       │   └── middleware.ts# Middleware Helper
+│       ├── data.ts          # Mock Data (Topics, Proposals)
+│       ├── types.ts         # TypeScript interfaces
+│       └── utils.ts         # Helper functions
 ```
 
 ## Data Models (`src/lib/types.ts`)
@@ -64,27 +74,31 @@ Reusable components follow a "shadcn/ui-like" pattern:
 
 ## Key Flows & Implementation Details
 
-### 1. Dashboard (`src/app/page.tsx`)
+### 1. Authentication
+- **Supabase Auth**: Handles user management via Email/Password and Twitch OAuth.
+- **Middleware**: `middleware.ts` ensures session persistence by refreshing cookies on every request.
+- **Callback Route**: `/auth/callback` handles the PKCE code exchange.
+- **UI State**: Navbar and pages react to the user's session state.
+
+### 2. Server Actions Pattern
+Server Actions are used for form submissions and data mutations.
+- **Location**: Colocated with the feature (e.g., `src/app/(auth)/actions.ts` for auth).
+- **Pattern**:
+    - **Input**: Receives `FormData`.
+    - **Logic**: Performs server-side logic (Supabase calls, DB mutations).
+    - **Response**: Returns a standard state object: `{ success: boolean, message: string | null, error: string | null }`.
+    - **Usage**: Consumed by Client Components using `useActionState` for progressive enhancement and state management.
+
+### 3. Dashboard (`src/app/page.tsx`)
 - **Hero Section**: Introduces the app.
-- **Search**: Visual placeholder for vector search.
 - **Active Topics**: Renders `TopicCard` components from `MOCK_TOPICS`.
 
-### 2. Topic Details (`src/app/topic/[id]/page.tsx`)
+### 4. Topic Details (`src/app/topic/[id]/page.tsx`)
 - **Dynamic Route**: Fetches topic by ID from mock data.
 - **Proposals List**: Filters `MOCK_PROPOSALS` by `topicId`.
-- **Interaction**: `ProposalCard` manages its own local voting state.
 
-### 3. Create Proposal (`src/app/propose/page.tsx`)
-- **Multi-step Form**:
-    1.  **Input**: Topic selection and Title.
-    2.  **Similarity Check**: Mock async function simulates vector search delay and returns "similar" proposals.
-    3.  **Submission**: Final details and submit action (alert only).
+### 5. Create Proposal (`src/app/propose/page.tsx`)
+- **Multi-step Form**: Topic selection, Similarity Check (Mock), and Submission.
 
-### 4. Admin Dashboard (`src/app/admin/page.tsx`)
+### 6. Admin Dashboard (`src/app/admin/page.tsx`)
 - **Table View**: Lists all topics with status badges and management actions.
-- **Actions**: Visual toggles for locking/archiving topics.
-
-### 5. Authentication (`src/app/(auth)/`)
-- **Route Group**: Uses `(auth)` to share a centered layout.
-- **Login/Signup**: Visual mocks for authentication.
-- **Twitch Integration**: Includes "Sign in with Twitch" button (Visual only).
