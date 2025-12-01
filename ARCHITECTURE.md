@@ -71,6 +71,7 @@ Reusable components follow a "shadcn/ui-like" pattern:
 - **Button**: Variants (default, outline, ghost, secondary, destructive).
 - **Badge**: Status indicators (success, secondary, outline).
 - **Input/Textarea**: Form elements with consistent styling.
+- **Label**: Form label component.
 
 ## Key Flows & Implementation Details
 
