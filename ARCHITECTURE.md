@@ -79,8 +79,3 @@ Reusable components follow a "shadcn/ui-like" pattern:
 ### 4. Admin Dashboard (`src/app/admin/page.tsx`)
 - **Table View**: Lists all topics with status badges and management actions.
 - **Actions**: Visual toggles for locking/archiving topics.
-
-## Future Considerations
-- **Backend**: Replace `src/lib/data.ts` with Supabase client calls.
-- **Auth**: Integrate Supabase Auth in `Navbar` and protected routes.
-- **State Management**: Move local state (like voting) to server actions or React Query.
