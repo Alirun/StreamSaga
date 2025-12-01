@@ -15,6 +15,10 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 ```
 src/
 ├── app/                 # App Router pages and layouts
+│   ├── (auth)/          # Authentication Pages (Route Group)
+│   │   ├── login/       # Sign In Page
+│   │   ├── signup/      # Sign Up Page
+│   │   └── layout.tsx   # Auth Layout (Centered)
 │   ├── admin/           # Admin Dashboard
 │   ├── propose/         # Proposal Creation Flow
 │   ├── topic/           # Topic Details
@@ -79,3 +83,8 @@ Reusable components follow a "shadcn/ui-like" pattern:
 ### 4. Admin Dashboard (`src/app/admin/page.tsx`)
 - **Table View**: Lists all topics with status badges and management actions.
 - **Actions**: Visual toggles for locking/archiving topics.
+
+### 5. Authentication (`src/app/(auth)/`)
+- **Route Group**: Uses `(auth)` to share a centered layout.
+- **Login/Signup**: Visual mocks for authentication.
+- **Twitch Integration**: Includes "Sign in with Twitch" button (Visual only).

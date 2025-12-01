@@ -12,10 +12,12 @@ export function Navbar() {
                     <Link href="/admin">
                         <Button variant="ghost" size="sm">Admin</Button>
                     </Link>
-                    <Button size="sm" variant="secondary" className="gap-2">
-                        <User className="h-4 w-4" />
-                        Sign In
-                    </Button>
+                    <Link href="/login">
+                        <Button size="sm" variant="secondary" className="gap-2">
+                            <User className="h-4 w-4" />
+                            Sign In
+                        </Button>
+                    </Link>
                 </nav>
             </div>
         </header>
