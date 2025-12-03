@@ -15,6 +15,8 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 
 ```
 .
+├── supabase/
+│   └── migrations/      # Database migrations
 ├── src/
 │   ├── middleware.ts        # Root middleware for session management & RBAC
 │   ├── app/                 # App Router pages and layouts
@@ -26,6 +28,10 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │   │   ├── auth/
 │   │   │   └── callback/    # OAuth Callback Route
 │   │   ├── admin/           # Admin Dashboard
+│   │   │   ├── actions.ts   # Admin Server Actions
+│   │   │   ├── new-topic-dialog.tsx # Topic Creation Dialog
+│   │   │   ├── topic-list.tsx       # Realtime Topic List
+│   │   │   └── page.tsx     # Admin Page Entry
 │   │   ├── propose/         # Proposal Creation Flow
 │   │   ├── topic/           # Topic Details
 │   │   ├── globals.css      # Global styles & Design System variables
@@ -44,13 +50,16 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │       │   └── middleware.ts# Middleware Helper
 │       ├── data.ts          # Mock Data (Topics, Proposals)
 │       ├── types.ts         # TypeScript interfaces
-│       └── utils.ts         # Helper functions
+│       ├── utils.ts         # Helper functions
+│       └── services/        # Business Logic & Data Access
+│           ├── topics.ts    # Topic operations
+│           └── realtime.ts  # Realtime subscriptions
 ```
 
 ## Data Models (`src/lib/types.ts`)
 The application uses strict TypeScript definitions for its entities:
 - **User**: `id`, `email`, `role` ('admin' | null)
-- **Topic**: `id`, `title`, `status` ('open' | 'closed' | 'archived'), `userId`
+- **Topic**: `id`, `title`, `status` ('open' | 'closed' | 'archived'), `userId`, `created_at`, `embedding` (vector)
 - **Proposal**: `id`, `title`, `topicId`, `userId`
 - **Vote**: `id`, `proposalId`, `userId`
 
@@ -71,6 +80,8 @@ Reusable components follow a "shadcn/ui-like" pattern:
 - **Button**: Variants (default, outline, ghost, secondary, destructive).
 - **Badge**: Status indicators (success, secondary, outline).
 - **Input/Textarea**: Form elements with consistent styling.
+
+- **Dialog**: Custom accessible modal component (`src/components/ui/dialog.tsx`).
 - **Label**: Form label component.
 
 ## Key Flows & Implementation Details
@@ -91,16 +102,25 @@ Server Actions are used for form submissions and data mutations.
     - **Response**: Returns a standard state object: `{ success: boolean, message: string | null, error: string | null }`.
     - **Usage**: Consumed by Client Components using `useActionState` for progressive enhancement and state management.
 
-### 3. Dashboard (`src/app/page.tsx`)
+### 3. Service Layer Pattern
+To ensure testability and separation of concerns, business logic is abstracted from Server Actions.
+- **Services (`src/lib/services/`)**: Handle pure business logic and database interactions. They are UI-agnostic.
+- **Server Actions (`actions.ts`)**: Act as API controllers. They handle authentication checks, input parsing (FormData), and response formatting, delegating the actual work to Services.
+- **Rule**: UI Components should never call the DB directly. They use Server Actions (for mutations) or Services (for data fetching in Server Components).
+
+### 4. Dashboard (`src/app/page.tsx`)
 - **Hero Section**: Introduces the app.
 - **Active Topics**: Renders `TopicCard` components from `MOCK_TOPICS`.
 
-### 4. Topic Details (`src/app/topic/[id]/page.tsx`)
+### 5. Topic Details (`src/app/topic/[id]/page.tsx`)
 - **Dynamic Route**: Fetches topic by ID from mock data.
 - **Proposals List**: Filters `MOCK_PROPOSALS` by `topicId`.
 
-### 5. Create Proposal (`src/app/propose/page.tsx`)
+### 6. Create Proposal (`src/app/propose/page.tsx`)
 - **Multi-step Form**: Topic selection, Similarity Check (Mock), and Submission.
 
-### 6. Admin Dashboard (`src/app/admin/page.tsx`)
-- **Table View**: Lists all topics with status badges and management actions.
+### 7. Admin Dashboard (`src/app/admin/page.tsx`)
+
+- **Realtime Updates**: Uses `TopicList` client component to subscribe to Supabase Realtime changes via `src/lib/services/realtime.ts`.
+- **Topic Creation**: `NewTopicDialog` uses Server Action `createTopic` which delegates to `src/lib/services/topics.ts`.
+- **Data Fetching**: Server Component fetches initial state using `getTopics` from `src/lib/services/topics.ts`.

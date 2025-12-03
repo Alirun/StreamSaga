@@ -15,6 +15,11 @@ export type Topic = {
     createdAt: string;
     updatedAt: string;
     archivedAt?: string;
+    // Supabase fields
+    created_at?: string;
+    updated_at?: string;
+    archived_at?: string;
+    embedding?: number[];
     _count?: {
         proposals: number;
     };
