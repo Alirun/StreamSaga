@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { createTopic as createTopicService } from "@/lib/services/topics";
+import { createTopic as createTopicService, searchSimilarTopics } from "@/lib/services/topics";
 
 export type ActionState = {
     success: boolean;
@@ -40,4 +40,21 @@ export async function createTopic(prevState: ActionState, formData: FormData): P
 
     revalidatePath("/admin");
     return { success: true, message: "Topic created successfully", error: null };
+}
+
+export async function findSimilarTopics(title: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return [];
+    }
+
+    try {
+        const results = await searchSimilarTopics(title);
+        return results;
+    } catch (e) {
+        console.error("Error in findSimilarTopics:", e);
+        return [];
+    }
 }

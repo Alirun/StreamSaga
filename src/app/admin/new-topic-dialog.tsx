@@ -13,7 +13,7 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { createTopic } from "./actions";
+import { createTopic, findSimilarTopics } from "./actions";
 
 const initialState = {
     success: false,
@@ -24,6 +24,29 @@ const initialState = {
 export function NewTopicDialog() {
     const [open, setOpen] = useState(false);
     const [state, formAction, isPending] = useActionState(createTopic, initialState);
+    const [title, setTitle] = useState("");
+    const [similarTopics, setSimilarTopics] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (title.length > 3) {
+                setIsSearching(true);
+                try {
+                    const results = await findSimilarTopics(title);
+                    setSimilarTopics(results || []);
+                } catch (err) {
+                    console.error("Search failed:", err);
+                } finally {
+                    setIsSearching(false);
+                }
+            } else {
+                setSimilarTopics([]);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [title]);
 
     useEffect(() => {
         if (state.success) {
@@ -51,7 +74,25 @@ export function NewTopicDialog() {
                             name="title"
                             placeholder="e.g. Season 4: AI Agents"
                             required
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                         />
+                        {isSearching && <p className="text-xs text-muted-foreground mt-1">Searching for similar topics...</p>}
+                        {similarTopics.length > 0 && (
+                            <div className="mt-2 rounded-md border bg-muted/50 p-3">
+                                <p className="text-xs font-medium text-muted-foreground mb-2">Similar topics found:</p>
+                                <ul className="space-y-1">
+                                    {similarTopics.map((topic) => (
+                                        <li key={topic.id} className="text-sm flex justify-between">
+                                            <span>{topic.title}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {Math.round(topic.similarity * 100)}% match
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="status">Status</Label>

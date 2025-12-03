@@ -45,3 +45,28 @@ export async function createTopic(data: CreateTopicData) {
         throw new Error(`Error creating topic: ${error.message}`);
     }
 }
+
+export async function searchSimilarTopics(query: string) {
+    const supabase = await createClient();
+
+    // Generate embedding for the query
+    try {
+        const embedding = await generateEmbedding(query);
+
+        const { data, error } = await supabase.rpc("match_topics", {
+            query_embedding: embedding,
+            match_threshold: 0.3,
+            match_count: 5,
+        });
+
+        if (error) {
+            console.error("Error searching topics:", error);
+            return [];
+        }
+
+        return data;
+    } catch (e) {
+        console.error("Error in searchSimilarTopics:", e);
+        return [];
+    }
+}
