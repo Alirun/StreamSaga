@@ -11,14 +11,20 @@ export async function getTopics() {
     const supabase = await createClient();
     const { data, error } = await supabase
         .from("topics")
-        .select("*, _count:proposals(count)")
+        .select("*")
         .order("created_at", { ascending: false });
 
     if (error) {
         throw new Error(`Error fetching topics: ${error.message}`);
     }
 
-    return data as unknown as Topic[];
+    // Mock proposal count for now
+    const topicsWithCount = data.map((topic) => ({
+        ...topic,
+        _count: { proposals: 0 }, // Mocked count
+    }));
+
+    return topicsWithCount as unknown as Topic[];
 }
 
 export async function createTopic(data: CreateTopicData) {
