@@ -15,8 +15,8 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 
 ```
 .
-├── middleware.ts        # Root middleware for session management
 ├── src/
+│   ├── middleware.ts        # Root middleware for session management & RBAC
 │   ├── app/                 # App Router pages and layouts
 │   │   ├── (auth)/          # Authentication Pages (Route Group)
 │   │   │   ├── login/       # Sign In Page
@@ -34,7 +34,7 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │   ├── components/          # React components
 │   │   ├── ui/              # Reusable UI primitives
 │   │   ├── logo.tsx         # Branding component
-│   │   ├── navbar.tsx       # Main navigation (Auth aware)
+│   │   ├── navbar.tsx       # Main navigation (Auth aware, Admin link gated by role)
 │   │   ├── proposal-card.tsx# Proposal display & voting logic
 │   │   └── topic-card.tsx   # Topic summary card
 │   └── lib/                 # Utilities and Data
@@ -77,7 +77,8 @@ Reusable components follow a "shadcn/ui-like" pattern:
 
 ### 1. Authentication
 - **Supabase Auth**: Handles user management via Email/Password and Twitch OAuth.
-- **Middleware**: `middleware.ts` ensures session persistence by refreshing cookies on every request.
+- **Middleware**: `src/middleware.ts` ensures session persistence and implements **Role-Based Access Control (RBAC)**.
+    - Gates access to `/admin` routes based on `user.app_metadata.role === 'admin'`.
 - **Callback Route**: `/auth/callback` handles the PKCE code exchange.
 - **UI State**: Navbar and pages react to the user's session state.
 

@@ -15,9 +15,11 @@ export async function Navbar() {
             <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-6 mx-auto">
                 <Logo />
                 <nav className="flex items-center gap-4">
-                    <Link href="/admin">
-                        <Button variant="ghost" size="sm">Admin</Button>
-                    </Link>
+                    {user?.app_metadata?.role === 'admin' && (
+                        <Link href="/admin">
+                            <Button variant="ghost" size="sm">Admin</Button>
+                        </Link>
+                    )}
                     {user ? (
                         <form action={logout}>
                             <Button size="sm" variant="ghost" className="gap-2">

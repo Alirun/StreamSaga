@@ -46,5 +46,11 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+        if (!user || user.app_metadata.role !== 'admin') {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+    }
+
     return supabaseResponse
 }
