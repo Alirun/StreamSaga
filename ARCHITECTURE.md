@@ -10,6 +10,7 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 - **Language**: TypeScript
 - **Icons**: Lucide React
 - **Utilities**: `clsx`, `tailwind-merge`
+- **AI**: OpenAI SDK
 
 ## Project Structure
 
@@ -123,5 +124,6 @@ To ensure testability and separation of concerns, business logic is abstracted f
 
 - **Realtime Updates**: Uses `TopicList` client component to subscribe to Supabase Realtime changes via `src/lib/services/realtime.ts`.
 - **Topic Creation**: `NewTopicDialog` uses Server Action `createTopic` which delegates to `src/lib/services/topics.ts`.
+    - **Embeddings**: Generates vector embeddings for topic titles using `src/lib/services/openai.ts` (OpenAI API) before saving to Supabase.
 - **Data Fetching**: Server Component fetches initial state using `getTopics` from `src/lib/services/topics.ts`.
 - **Note**: Proposal count is currently mocked as 0 until `proposals` table is implemented.

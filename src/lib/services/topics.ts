@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Topic } from "@/lib/types";
+import { generateEmbedding } from "./openai";
 
 export type CreateTopicData = {
     title: string;
@@ -29,10 +30,15 @@ export async function getTopics() {
 
 export async function createTopic(data: CreateTopicData) {
     const supabase = await createClient();
+
+    // Generate embedding for the title
+    const embedding = await generateEmbedding(data.title);
+
     const { error } = await supabase.from("topics").insert({
         title: data.title,
         status: data.status,
         user_id: data.userId,
+        embedding: embedding,
     });
 
     if (error) {
