@@ -28,6 +28,7 @@ export type Topic = {
 export type Proposal = {
     id: string;
     title: string;
+    description?: string;
     topicId: string;
     userId: string;
     createdAt: string;

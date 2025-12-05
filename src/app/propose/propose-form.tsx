@@ -1,50 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { MOCK_PROPOSALS } from "@/lib/data";
-import { Topic } from "@/lib/types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Topic, Proposal } from "@/lib/types";
 import { ProposalCard } from "@/components/proposal-card";
+import { createProposal, findSimilarProposals, ActionState } from "./actions";
 
 interface ProposeFormProps {
     topics: Topic[];
 }
 
+const initialState: ActionState = {
+    success: false,
+    message: null,
+    error: null,
+};
+
 export function ProposeForm({ topics }: ProposeFormProps) {
     const [step, setStep] = useState<1 | 2>(1);
     const [isChecking, setIsChecking] = useState(false);
     const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
     const [topicId, setTopicId] = useState(topics[0]?.id || "");
-    const [similarProposals, setSimilarProposals] = useState<typeof MOCK_PROPOSALS>([]);
+    const [similarProposals, setSimilarProposals] = useState<Proposal[]>([]);
+    const [state, formAction, isPending] = useActionState(createProposal, initialState);
 
     const handleCheckSimilarity = async () => {
         if (!title) return;
 
         setIsChecking(true);
-        // Simulate network delay for vector search
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Mock similarity check: find proposals with "AI" or "agent" if title contains them, else random
-        const keywords = title.toLowerCase().split(" ");
-        const similar = MOCK_PROPOSALS.filter(p =>
-            keywords.some(k => k.length > 3 && p.title.toLowerCase().includes(k))
-        );
-
-        setSimilarProposals(similar);
+        try {
+            const similar = await findSimilarProposals(title, topicId);
+            setSimilarProposals(similar);
+        } catch (error) {
+            console.error("Error checking similarity:", error);
+            setSimilarProposals([]);
+        }
         setIsChecking(false);
         setStep(2);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // In a real app, this would submit to the backend
-        alert("Proposal submitted! (Mock)");
     };
 
     return (
@@ -63,7 +62,9 @@ export function ProposeForm({ topics }: ProposeFormProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form action={formAction} className="space-y-6">
+                        <input type="hidden" name="topicId" value={topicId} />
+                        <input type="hidden" name="title" value={title} />
                         <div className="space-y-2">
                             <Label htmlFor="topic">Topic</Label>
                             <select
@@ -130,7 +131,7 @@ export function ProposeForm({ topics }: ProposeFormProps) {
                                 ) : (
                                     <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4 flex items-center gap-2 text-green-500">
                                         <CheckCircle2 className="h-5 w-5" />
-                                        <span className="font-medium">No similar proposals found. You're good to go!</span>
+                                        <span className="font-medium">No similar proposals found. You&apos;re good to go!</span>
                                     </div>
                                 )}
 
@@ -138,17 +139,40 @@ export function ProposeForm({ topics }: ProposeFormProps) {
                                     <Label htmlFor="description">Description (Optional)</Label>
                                     <Textarea
                                         id="description"
+                                        name="description"
                                         placeholder="Describe your idea in more detail..."
                                         className="min-h-[120px]"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
                                     />
                                 </div>
 
+                                {state.error && (
+                                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 flex items-center gap-2 text-red-500">
+                                        <AlertCircle className="h-5 w-5" />
+                                        <span>{state.error}</span>
+                                    </div>
+                                )}
+
                                 <div className="flex gap-3">
-                                    <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setStep(1)}
+                                        className="flex-1"
+                                        disabled={isPending}
+                                    >
                                         Back
                                     </Button>
-                                    <Button type="submit" className="flex-1">
-                                        Submit Proposal
+                                    <Button type="submit" className="flex-1" disabled={isPending}>
+                                        {isPending ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            "Submit Proposal"
+                                        )}
                                     </Button>
                                 </div>
                             </div>

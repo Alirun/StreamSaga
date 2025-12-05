@@ -34,6 +34,9 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │   │   │   ├── topic-list.tsx       # Realtime Topic List
 │   │   │   └── page.tsx     # Admin Page Entry
 │   │   ├── propose/         # Proposal Creation Flow
+│   │   │   ├── actions.ts   # Proposal Server Actions
+│   │   │   ├── propose-form.tsx # Multi-step Proposal Form
+│   │   │   └── page.tsx     # Proposal Page Entry
 │   │   ├── topic/           # Topic Details
 │   │   ├── globals.css      # Global styles & Design System variables
 │   │   ├── layout.tsx       # Root layout with Navbar
@@ -50,11 +53,12 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │       │   ├── client.ts    # Browser Client
 │       │   ├── server.ts    # Server Client (Cookies)
 │       │   └── middleware.ts# Middleware Helper
-│       ├── data.ts          # Mock Data (Proposals only, Topics are real)
 │       ├── types.ts         # TypeScript interfaces
 │       ├── utils.ts         # Helper functions
 │       └── services/        # Business Logic & Data Access
 │           ├── topics.ts    # Topic operations
+│           ├── proposals.ts # Proposal operations
+│           ├── openai.ts    # OpenAI embedding generation
 │           └── realtime.ts  # Realtime subscriptions
 ```
 
@@ -62,7 +66,7 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 The application uses strict TypeScript definitions for its entities:
 - **User**: `id`, `email`, `role` ('admin' | null)
 - **Topic**: `id`, `title`, `status` ('open' | 'closed' | 'archived'), `userId`, `created_at`, `embedding` (vector)
-- **Proposal**: `id`, `title`, `topicId`, `userId`
+- **Proposal**: `id`, `title`, `description`, `topicId`, `userId`, `embedding` (vector)
 - **Vote**: `id`, `proposalId`, `userId`
 
 ## Design System
@@ -119,16 +123,30 @@ To ensure testability and separation of concerns, business logic is abstracted f
 
 ### 5. Topic Details (`src/app/topic/[id]/page.tsx`)
 - **Dynamic Route**: Fetches topic by ID from Supabase using `getTopicById()`.
-- **Proposals List**: Filters `MOCK_PROPOSALS` by `topicId` (real proposals pending).
+- **Proposals List**: Fetches real proposals using `getProposalsByTopicId()` from the proposals service.
+- **Proposal Count**: Topic cards display real proposal counts from database.
 
 ### 6. Create Proposal (`src/app/propose/`)
 - **Server/Client Split**: `page.tsx` (Server) fetches open topics, `propose-form.tsx` (Client) handles form.
-- **Multi-step Form**: Topic selection, Similarity Check (Mock), and Submission.
+- **Multi-step Form**: Topic selection, Similarity Check (vector search), and Submission.
+- **Similarity Search**: Uses OpenAI embeddings with `match_proposals` RPC to find similar proposals (threshold ≥ 0.3).
+- **Server Actions**: `createProposal` handles auth, validation, and delegates to proposals service.
+- **Embeddings**: Generates vector embeddings from title + description using `src/lib/services/openai.ts`.
 
 ### 7. Admin Dashboard (`src/app/admin/page.tsx`)
-
 - **Realtime Updates**: Uses `TopicList` client component to subscribe to Supabase Realtime changes via `src/lib/services/realtime.ts`.
 - **Topic Creation**: `NewTopicDialog` uses Server Action `createTopic` which delegates to `src/lib/services/topics.ts`.
     - **Embeddings**: Generates vector embeddings for topic titles using `src/lib/services/openai.ts` (OpenAI API) before saving to Supabase.
 - **Data Fetching**: Server Component fetches initial state using `getTopics` from `src/lib/services/topics.ts`.
-- **Note**: Proposal count is currently mocked as 0 until `proposals` table is implemented.
+- **Proposal Counts**: Real counts fetched from proposals table for each topic.
+
+### 8. Database Schema
+
+#### Topics Table
+- `id`, `title`, `status`, `user_id`, `created_at`, `updated_at`, `archived_at`, `embedding`
+- RLS: Public read, Admin insert/update
+
+#### Proposals Table
+- `id`, `title`, `description`, `topic_id`, `user_id`, `created_at`, `updated_at`, `archived_at`, `embedding`
+- RLS: Public read (non-archived), Authenticated insert (for open topics), Owner update (soft-delete via archived_at)
+- No hard deletes allowed - only soft-delete via `archived_at`

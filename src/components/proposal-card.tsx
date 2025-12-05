@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowBigUp, User } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowBigUp } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { UserAvatar } from "@/components/user-avatar";
+import { RelativeTime } from "@/components/relative-time";
 import { Proposal } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -13,9 +14,22 @@ interface ProposalCardProps {
     hasVoted?: boolean;
 }
 
+// Get creation date from either camelCase or snake_case field
+function getCreatedAt(proposal: Proposal): string {
+    return proposal.createdAt || (proposal as any).created_at || new Date().toISOString();
+}
+
+// Get user ID from either camelCase or snake_case field
+function getUserId(proposal: Proposal): string {
+    return proposal.userId || (proposal as any).user_id || "unknown";
+}
+
 export function ProposalCard({ proposal, hasVoted: initialHasVoted = false }: ProposalCardProps) {
     const [hasVoted, setHasVoted] = useState(initialHasVoted);
     const [voteCount, setVoteCount] = useState(proposal._count?.votes || 0);
+
+    const createdAt = getCreatedAt(proposal);
+    const userId = getUserId(proposal);
 
     const handleVote = () => {
         if (hasVoted) {
@@ -55,19 +69,22 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false }: Pr
                             {proposal.title}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="pb-2">
+                    <CardContent className="pb-4 space-y-3">
+                        {/* Description if present */}
+                        {proposal.description && (
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                {proposal.description}
+                            </p>
+                        )}
+
+                        {/* Author and time info */}
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                                <User className="h-3 w-3" />
-                                <span>@{proposal.userId}</span>
-                            </div>
-                            <span>•</span>
-                            <span>{new Date(proposal.createdAt).toLocaleDateString()}</span>
+                            <UserAvatar userId={userId} size="sm" />
+                            <span className="font-medium text-foreground">{userId.substring(0, 8)}...</span>
+                            <span>·</span>
+                            <RelativeTime date={createdAt} />
                         </div>
                     </CardContent>
-                    <CardFooter className="pt-0">
-                        {/* Tags or other metadata could go here */}
-                    </CardFooter>
                 </div>
             </div>
         </Card>

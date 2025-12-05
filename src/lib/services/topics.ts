@@ -8,32 +8,39 @@ export type CreateTopicData = {
     userId: string;
 };
 
+// Helper to transform topic data with proposal count
+function transformTopicWithCount(topic: any): Topic {
+    // Supabase returns proposals as an array with count when using select('*, proposals(count)')
+    const proposalCount = topic.proposals?.[0]?.count ?? 0;
+    const { proposals, ...topicData } = topic;
+    return {
+        ...topicData,
+        _count: { proposals: proposalCount },
+    } as Topic;
+}
+
 export async function getTopics() {
     const supabase = await createClient();
     const { data, error } = await supabase
         .from("topics")
-        .select("*")
+        .select("*, proposals(count)")
+        .is("proposals.archived_at", null)
         .order("created_at", { ascending: false });
 
     if (error) {
         throw new Error(`Error fetching topics: ${error.message}`);
     }
 
-    // Mock proposal count for now
-    const topicsWithCount = data.map((topic) => ({
-        ...topic,
-        _count: { proposals: 0 }, // Mocked count
-    }));
-
-    return topicsWithCount as unknown as Topic[];
+    return data.map(transformTopicWithCount);
 }
 
 export async function getTopicsByStatus(status: TopicStatus, limit?: number) {
     const supabase = await createClient();
     let query = supabase
         .from("topics")
-        .select("*")
+        .select("*, proposals(count)")
         .eq("status", status)
+        .is("proposals.archived_at", null)
         .order("created_at", { ascending: false });
 
     if (limit) {
@@ -46,21 +53,16 @@ export async function getTopicsByStatus(status: TopicStatus, limit?: number) {
         throw new Error(`Error fetching topics: ${error.message}`);
     }
 
-    // Mock proposal count for now
-    const topicsWithCount = data.map((topic) => ({
-        ...topic,
-        _count: { proposals: 0 }, // Mocked count
-    }));
-
-    return topicsWithCount as unknown as Topic[];
+    return data.map(transformTopicWithCount);
 }
 
 export async function getTopicById(id: string) {
     const supabase = await createClient();
     const { data, error } = await supabase
         .from("topics")
-        .select("*")
+        .select("*, proposals(count)")
         .eq("id", id)
+        .is("proposals.archived_at", null)
         .single();
 
     if (error) {
@@ -71,10 +73,7 @@ export async function getTopicById(id: string) {
         throw new Error(`Error fetching topic: ${error.message}`);
     }
 
-    return {
-        ...data,
-        _count: { proposals: 0 }, // Mocked count for now
-    } as unknown as Topic;
+    return transformTopicWithCount(data);
 }
 
 export async function createTopic(data: CreateTopicData) {

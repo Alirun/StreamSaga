@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
-import { MOCK_PROPOSALS } from "@/lib/data";
 import { getTopicById } from "@/lib/services/topics";
+import { getProposalsByTopicId } from "@/lib/services/proposals";
 import { ProposalCard } from "@/components/proposal-card";
 import { UserAvatar } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
@@ -31,7 +31,7 @@ export default async function TopicPage({ params }: { params: Params }) {
         notFound();
     }
 
-    const proposals = MOCK_PROPOSALS.filter((p) => p.topicId === id);
+    const proposals = await getProposalsByTopicId(id);
     const createdAt = getCreatedAt(topic);
     const userId = getUserId(topic);
 
