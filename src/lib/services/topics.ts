@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Topic } from "@/lib/types";
+import { Topic, TopicStatus } from "@/lib/types";
 import { generateEmbedding } from "./openai";
 
 export type CreateTopicData = {
@@ -26,6 +26,55 @@ export async function getTopics() {
     }));
 
     return topicsWithCount as unknown as Topic[];
+}
+
+export async function getTopicsByStatus(status: TopicStatus, limit?: number) {
+    const supabase = await createClient();
+    let query = supabase
+        .from("topics")
+        .select("*")
+        .eq("status", status)
+        .order("created_at", { ascending: false });
+
+    if (limit) {
+        query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        throw new Error(`Error fetching topics: ${error.message}`);
+    }
+
+    // Mock proposal count for now
+    const topicsWithCount = data.map((topic) => ({
+        ...topic,
+        _count: { proposals: 0 }, // Mocked count
+    }));
+
+    return topicsWithCount as unknown as Topic[];
+}
+
+export async function getTopicById(id: string) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("topics")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (error) {
+        if (error.code === "PGRST116") {
+            // Row not found
+            return null;
+        }
+        throw new Error(`Error fetching topic: ${error.message}`);
+    }
+
+    return {
+        ...data,
+        _count: { proposals: 0 }, // Mocked count for now
+    } as unknown as Topic;
 }
 
 export async function createTopic(data: CreateTopicData) {

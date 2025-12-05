@@ -1,9 +1,12 @@
 import { Search } from "lucide-react";
-import { MOCK_TOPICS } from "@/lib/data";
-import { TopicCard } from "@/components/topic-card";
+import { getTopicsByStatus } from "@/lib/services/topics";
+import { TopicGrid } from "@/components/topic-grid";
 import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export default async function Home() {
+  const openTopics = await getTopicsByStatus("open");
+  const closedTopics = await getTopicsByStatus("closed");
+
   return (
     <main className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -39,16 +42,24 @@ export default function Home() {
 
       {/* Active Topics */}
       <section className="container px-4 md:px-6 py-12 mx-auto max-w-6xl">
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8">
           <h2 className="text-2xl font-bold tracking-tight">Active Topics</h2>
-          <Button variant="outline">View All</Button>
+          <p className="text-muted-foreground mt-1">Open for new proposals and voting</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_TOPICS.map((topic) => (
-            <TopicCard key={topic.id} topic={topic} />
-          ))}
-        </div>
+        <TopicGrid initialTopics={openTopics} status="open" previewCount={3} />
       </section>
+
+      {/* Closed Topics */}
+      {closedTopics.length > 0 && (
+        <section className="container px-4 md:px-6 py-12 mx-auto max-w-6xl border-t border-border/40">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold tracking-tight">Recent Closed Topics</h2>
+            <p className="text-muted-foreground mt-1">Past seasons and completed projects</p>
+          </div>
+          <TopicGrid initialTopics={closedTopics} status="closed" previewCount={3} />
+        </section>
+      )}
     </main>
   );
 }
+

@@ -1,34 +1,4 @@
-import { Topic, Proposal } from './types';
-
-export const MOCK_TOPICS: Topic[] = [
-    {
-        id: '1',
-        title: 'Season 4: AI Agents',
-        status: 'open',
-        userId: 'user_1',
-        createdAt: '2023-10-26T10:00:00Z',
-        updatedAt: '2023-10-26T10:00:00Z',
-        _count: { proposals: 12 },
-    },
-    {
-        id: '2',
-        title: 'Season 3: Mobile Apps',
-        status: 'closed',
-        userId: 'user_1',
-        createdAt: '2023-09-15T10:00:00Z',
-        updatedAt: '2023-10-15T10:00:00Z',
-        _count: { proposals: 45 },
-    },
-    {
-        id: '3',
-        title: 'Special Episode: Rust CLI Tools',
-        status: 'open',
-        userId: 'user_1',
-        createdAt: '2023-11-01T10:00:00Z',
-        updatedAt: '2023-11-01T10:00:00Z',
-        _count: { proposals: 8 },
-    },
-];
+import { Proposal } from './types';
 
 export const MOCK_PROPOSALS: Proposal[] = [
     {

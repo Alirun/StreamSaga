@@ -1,14 +1,29 @@
 import Link from "next/link";
-import { MessageSquare, ThumbsUp, Calendar } from "lucide-react";
+import { MessageSquare, Calendar } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { UserAvatar } from "@/components/user-avatar";
+import { RelativeTime } from "@/components/relative-time";
 import { Topic } from "@/lib/types";
 
 interface TopicCardProps {
     topic: Topic;
 }
 
+// Get creation date from either camelCase or snake_case field
+function getCreatedAt(topic: Topic): string {
+    return topic.createdAt || topic.created_at || new Date().toISOString();
+}
+
+// Get user ID from either camelCase or snake_case field
+function getUserId(topic: Topic): string {
+    return topic.userId || (topic as unknown as { user_id: string }).user_id || "unknown";
+}
+
 export function TopicCard({ topic }: TopicCardProps) {
+    const createdAt = getCreatedAt(topic);
+    const userId = getUserId(topic);
+
     return (
         <Link href={`/topic/${topic.id}`} className="block group">
             <Card className="h-full border-border/50 bg-card/50 hover:bg-card hover:border-primary/50 transition-all duration-300">
@@ -33,16 +48,18 @@ export function TopicCard({ topic }: TopicCardProps) {
                         </div>
                         <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            <span>{new Date(topic.createdAt).toLocaleDateString()}</span>
+                            <RelativeTime date={createdAt} />
                         </div>
                     </div>
                 </CardContent>
                 <CardFooter className="pt-0">
-                    <div className="text-xs text-muted-foreground">
-                        Created by <span className="text-foreground font-medium">@{topic.userId}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <UserAvatar userId={userId} size="sm" />
+                        <span>Created by <span className="text-foreground font-medium">{userId.substring(0, 8)}...</span></span>
                     </div>
                 </CardFooter>
             </Card>
         </Link>
     );
 }
+

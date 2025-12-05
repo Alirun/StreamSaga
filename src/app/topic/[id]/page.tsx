@@ -1,23 +1,39 @@
 import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
-import { MOCK_TOPICS, MOCK_PROPOSALS } from "@/lib/data";
+import { MOCK_PROPOSALS } from "@/lib/data";
+import { getTopicById } from "@/lib/services/topics";
 import { ProposalCard } from "@/components/proposal-card";
+import { UserAvatar } from "@/components/user-avatar";
+import { RelativeTime } from "@/components/relative-time";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
+import { Topic } from "@/lib/types";
 
 // In Next.js 15+, params is a Promise
 type Params = Promise<{ id: string }>;
 
+// Get creation date from either camelCase or snake_case field
+function getCreatedAt(topic: Topic): string {
+    return topic.createdAt || topic.created_at || new Date().toISOString();
+}
+
+// Get user ID from either camelCase or snake_case field
+function getUserId(topic: Topic): string {
+    return topic.userId || (topic as unknown as { user_id: string }).user_id || "unknown";
+}
+
 export default async function TopicPage({ params }: { params: Params }) {
     const { id } = await params;
-    const topic = MOCK_TOPICS.find((t) => t.id === id);
+    const topic = await getTopicById(id);
 
     if (!topic) {
         notFound();
     }
 
     const proposals = MOCK_PROPOSALS.filter((p) => p.topicId === id);
+    const createdAt = getCreatedAt(topic);
+    const userId = getUserId(topic);
 
     return (
         <main className="min-h-screen bg-background">
@@ -32,7 +48,7 @@ export default async function TopicPage({ params }: { params: Params }) {
 
                 {/* Topic Header */}
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-10">
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         <div className="flex items-center gap-3">
                             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{topic.title}</h1>
                             <Badge
@@ -42,9 +58,15 @@ export default async function TopicPage({ params }: { params: Params }) {
                                 {topic.status}
                             </Badge>
                         </div>
-                        <p className="text-muted-foreground">
-                            Created by <span className="text-foreground font-medium">@{topic.userId}</span> on {new Date(topic.createdAt).toLocaleDateString()}
-                        </p>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <UserAvatar userId={userId} size="md" />
+                            <div>
+                                <span>Created by </span>
+                                <span className="text-foreground font-medium">{userId.substring(0, 8)}...</span>
+                                <span> · </span>
+                                <RelativeTime date={createdAt} />
+                            </div>
+                        </div>
                     </div>
 
                     {topic.status === 'open' && (

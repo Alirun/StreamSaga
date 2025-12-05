@@ -1,11 +1,11 @@
 # StreamSaga Architecture
 
 ## Overview
-StreamSaga is a Next.js application where stream viewers can propose and vote for projects/features to be developed live. The project uses **Supabase Auth** for user management and client-side mock data for content (Topics/Proposals).
+StreamSaga is a Next.js application where stream viewers can propose and vote for projects/features to be developed live. The project uses **Supabase** for authentication and database, with real-time topic updates on the Dashboard.
 
 ## Tech Stack
 - **Framework**: Next.js 15 (App Router)
-- **Backend**: Supabase (Auth)
+- **Backend**: Supabase (Auth, Database, Realtime)
 - **Styling**: TailwindCSS v4
 - **Language**: TypeScript
 - **Icons**: Lucide React
@@ -43,13 +43,14 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │   │   ├── logo.tsx         # Branding component
 │   │   ├── navbar.tsx       # Main navigation (Auth aware, Admin link gated by role)
 │   │   ├── proposal-card.tsx# Proposal display & voting logic
-│   │   └── topic-card.tsx   # Topic summary card
+│   │   ├── topic-card.tsx   # Topic summary card
+│   │   └── topic-grid.tsx   # Topic grid with realtime updates & View All toggle
 │   └── lib/                 # Utilities and Data
 │       ├── supabase/        # Supabase Client Utilities
 │       │   ├── client.ts    # Browser Client
 │       │   ├── server.ts    # Server Client (Cookies)
 │       │   └── middleware.ts# Middleware Helper
-│       ├── data.ts          # Mock Data (Topics, Proposals)
+│       ├── data.ts          # Mock Data (Proposals only, Topics are real)
 │       ├── types.ts         # TypeScript interfaces
 │       ├── utils.ts         # Helper functions
 │       └── services/        # Business Logic & Data Access
@@ -110,14 +111,18 @@ To ensure testability and separation of concerns, business logic is abstracted f
 - **Rule**: UI Components should never call the DB directly. They use Server Actions (for mutations) or Services (for data fetching in Server Components).
 
 ### 4. Dashboard (`src/app/page.tsx`)
-- **Hero Section**: Introduces the app.
-- **Active Topics**: Renders `TopicCard` components from `MOCK_TOPICS`.
+- **Server Component**: Fetches topics from Supabase using `getTopicsByStatus()`.
+- **Hero Section**: Introduces the app with search bar.
+- **Active Topics**: Displays open topics via `TopicGrid` with realtime updates.
+- **Closed Topics**: Displays closed topics in a separate section (if any exist).
+- **View All Toggle**: `TopicGrid` shows 3 topics initially, expandable to show all.
 
 ### 5. Topic Details (`src/app/topic/[id]/page.tsx`)
-- **Dynamic Route**: Fetches topic by ID from mock data.
-- **Proposals List**: Filters `MOCK_PROPOSALS` by `topicId`.
+- **Dynamic Route**: Fetches topic by ID from Supabase using `getTopicById()`.
+- **Proposals List**: Filters `MOCK_PROPOSALS` by `topicId` (real proposals pending).
 
-### 6. Create Proposal (`src/app/propose/page.tsx`)
+### 6. Create Proposal (`src/app/propose/`)
+- **Server/Client Split**: `page.tsx` (Server) fetches open topics, `propose-form.tsx` (Client) handles form.
 - **Multi-step Form**: Topic selection, Similarity Check (Mock), and Submission.
 
 ### 7. Admin Dashboard (`src/app/admin/page.tsx`)
