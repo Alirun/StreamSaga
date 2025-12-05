@@ -102,13 +102,15 @@ export async function searchSimilarProposals(query: string, topicId: string, thr
 }
 
 export async function archiveProposal(proposalId: string, userId: string) {
-    const supabase = await createClient();
+    // Use admin client since we've already validated auth in the server action
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const supabase = createAdminClient();
 
     const { error } = await supabase
         .from("proposals")
         .update({ archived_at: new Date().toISOString() })
         .eq("id", proposalId)
-        .eq("user_id", userId); // Only owner can archive
+        .eq("user_id", userId); // Ownership check still enforced
 
     if (error) {
         throw new Error(`Error archiving proposal: ${error.message}`);

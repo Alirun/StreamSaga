@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
     createProposal as createProposalService,
-    searchSimilarProposals
+    searchSimilarProposals,
+    archiveProposal as archiveProposalService
 } from "@/lib/services/proposals";
 
 export type ActionState = {
@@ -71,4 +72,32 @@ export async function findSimilarProposals(title: string, topicId: string) {
         console.error("Error in findSimilarProposals:", e);
         return [];
     }
+}
+
+export async function archiveProposal(
+    proposalId: string,
+    topicId: string
+): Promise<ActionState> {
+    const supabase = await createClient();
+
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        return { success: false, message: null, error: "You must be logged in to archive a proposal" };
+    }
+
+    if (!proposalId) {
+        return { success: false, message: null, error: "Proposal ID is required" };
+    }
+
+    try {
+        await archiveProposalService(proposalId, user.id);
+    } catch (error: any) {
+        console.error("Error archiving proposal:", error);
+        return { success: false, message: null, error: error.message || "Failed to archive proposal" };
+    }
+
+    revalidatePath(`/topic/${topicId}`);
+    revalidatePath("/");
+    return { success: true, message: "Proposal archived successfully", error: null };
 }

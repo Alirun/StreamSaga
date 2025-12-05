@@ -130,8 +130,13 @@ To ensure testability and separation of concerns, business logic is abstracted f
 - **Server/Client Split**: `page.tsx` (Server) fetches open topics, `propose-form.tsx` (Client) handles form.
 - **Multi-step Form**: Topic selection, Similarity Check (vector search), and Submission.
 - **Similarity Search**: Uses OpenAI embeddings with `match_proposals` RPC to find similar proposals (threshold ≥ 0.3).
-- **Server Actions**: `createProposal` handles auth, validation, and delegates to proposals service.
+- **Server Actions**: `createProposal` handles auth, validation, and delegates to proposals service. `archiveProposal` allows owners to soft-delete their proposals.
 - **Embeddings**: Generates vector embeddings from title + description using `src/lib/services/openai.ts`.
+
+### 6.1 Proposal Card (`src/components/proposal-card.tsx`)
+- **Owner Actions**: Displays a "Remove" button (trash icon) for proposal owners.
+- **Optimistic UI**: Immediately hides the card when archiving, reverts on error.
+- **Props**: Receives `currentUserId` and `topicId` from topic page for ownership checking.
 
 ### 7. Admin Dashboard (`src/app/admin/page.tsx`)
 - **Realtime Updates**: Uses `TopicList` client component to subscribe to Supabase Realtime changes via `src/lib/services/realtime.ts`.

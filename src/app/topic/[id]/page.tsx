@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { getTopicById } from "@/lib/services/topics";
 import { getProposalsByTopicId } from "@/lib/services/proposals";
+import { createClient } from "@/lib/supabase/server";
 import { ProposalCard } from "@/components/proposal-card";
 import { UserAvatar } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
@@ -25,15 +26,23 @@ function getUserId(topic: Topic): string {
 
 export default async function TopicPage({ params }: { params: Params }) {
     const { id } = await params;
-    const topic = await getTopicById(id);
+    const [topic, supabase] = await Promise.all([
+        getTopicById(id),
+        createClient()
+    ]);
 
     if (!topic) {
         notFound();
     }
 
-    const proposals = await getProposalsByTopicId(id);
+    const [proposals, { data: { user } }] = await Promise.all([
+        getProposalsByTopicId(id),
+        supabase.auth.getUser()
+    ]);
+
     const createdAt = getCreatedAt(topic);
     const userId = getUserId(topic);
+    const currentUserId = user?.id;
 
     return (
         <main className="min-h-screen bg-background">
@@ -92,7 +101,12 @@ export default async function TopicPage({ params }: { params: Params }) {
                     <div className="grid gap-4">
                         {proposals.length > 0 ? (
                             proposals.map((proposal) => (
-                                <ProposalCard key={proposal.id} proposal={proposal} />
+                                <ProposalCard
+                                    key={proposal.id}
+                                    proposal={proposal}
+                                    currentUserId={currentUserId}
+                                    topicId={id}
+                                />
                             ))
                         ) : (
                             <div className="text-center py-12 border border-dashed rounded-lg">
