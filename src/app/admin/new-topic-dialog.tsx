@@ -94,19 +94,6 @@ export function NewTopicDialog() {
                             </div>
                         )}
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="status">Status</Label>
-                        <select
-                            id="status"
-                            name="status"
-                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            defaultValue="open"
-                        >
-                            <option value="open">Open</option>
-                            <option value="closed">Closed</option>
-                            <option value="archived">Archived</option>
-                        </select>
-                    </div>
 
                     {state.error && (
                         <p className="text-sm text-red-500">{state.error}</p>
