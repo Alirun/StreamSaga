@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MoreHorizontal, Archive, Lock, Unlock, Settings } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { Archive, Settings, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
 import { Topic } from "@/lib/types";
 import { subscribeToTopics } from "@/lib/services/realtime";
 import { ResolveTopicDialog } from "./resolve-topic-dialog";
+import { archiveTopic } from "./actions";
 
 interface TopicListProps {
     initialTopics: Topic[];
@@ -17,6 +19,9 @@ export function TopicList({ initialTopics }: TopicListProps) {
     const [topics, setTopics] = useState<Topic[]>(initialTopics);
     const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
+    const [topicToArchive, setTopicToArchive] = useState<Topic | null>(null);
+    const [isPending, startTransition] = useTransition();
     const supabase = createClient();
 
     useEffect(() => {
@@ -48,6 +53,24 @@ export function TopicList({ initialTopics }: TopicListProps) {
 
     const handleResolved = () => {
         // Topic will be updated via realtime subscription
+    };
+
+    const handleArchiveClick = (topic: Topic) => {
+        setTopicToArchive(topic);
+        setArchiveConfirmOpen(true);
+    };
+
+    const handleArchiveConfirm = () => {
+        if (!topicToArchive) return;
+
+        startTransition(async () => {
+            const result = await archiveTopic(topicToArchive.id);
+            if (!result.success) {
+                console.error("Failed to archive topic:", result.error);
+            }
+            setArchiveConfirmOpen(false);
+            setTopicToArchive(null);
+        });
     };
 
     return (
@@ -106,19 +129,18 @@ export function TopicList({ initialTopics }: TopicListProps) {
                                                     Manage
                                                 </Button>
                                             )}
-                                            <Button variant="ghost" size="icon" title="Toggle Status">
-                                                {topic.status === "open" ? (
-                                                    <Lock className="h-4 w-4" />
-                                                ) : (
-                                                    <Unlock className="h-4 w-4" />
-                                                )}
-                                            </Button>
-                                            <Button variant="ghost" size="icon" title="Archive">
-                                                <Archive className="h-4 w-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
+                                            {topic.status !== "archived" && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleArchiveClick(topic)}
+                                                    title="Archive Topic"
+                                                    disabled={isPending}
+                                                >
+                                                    <Archive className="h-4 w-4 mr-1" />
+                                                    Archive
+                                                </Button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -136,6 +158,34 @@ export function TopicList({ initialTopics }: TopicListProps) {
                     onResolved={handleResolved}
                 />
             )}
+
+            {/* Archive Confirmation Dialog */}
+            <Dialog open={archiveConfirmOpen} onOpenChange={setArchiveConfirmOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Archive Topic</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-muted-foreground">
+                        Are you sure you want to archive &quot;{topicToArchive?.title}&quot;? This will hide it from the public dashboard.
+                    </p>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setArchiveConfirmOpen(false)} disabled={isPending}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleArchiveConfirm} disabled={isPending}>
+                            {isPending ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Archiving...
+                                </>
+                            ) : (
+                                "Archive"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
+

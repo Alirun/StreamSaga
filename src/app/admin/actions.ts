@@ -121,3 +121,30 @@ export async function getProposalsForTopic(topicId: string) {
         return [];
     }
 }
+
+export async function archiveTopic(topicId: string): Promise<ActionState> {
+    const supabase = await createClient();
+
+    // Check authentication and admin role
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        return { success: false, message: null, error: "Unauthorized" };
+    }
+
+    const role = user.app_metadata?.role;
+    if (role !== "admin") {
+        return { success: false, message: null, error: "Admin access required" };
+    }
+
+    try {
+        const { updateTopicStatus } = await import("@/lib/services/topics");
+        await updateTopicStatus(topicId, "archived");
+    } catch (error: any) {
+        console.error("Error archiving topic:", error);
+        return { success: false, message: null, error: error.message || "Failed to archive topic" };
+    }
+
+    revalidatePath("/admin");
+    revalidatePath("/");
+    return { success: true, message: "Topic archived successfully", error: null };
+}

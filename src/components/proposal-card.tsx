@@ -106,6 +106,7 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false, curr
                         <Button
                             variant="ghost"
                             size="icon"
+                            type="button"
                             className={cn(
                                 "h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors",
                                 hasVoted && "text-primary bg-primary/10"

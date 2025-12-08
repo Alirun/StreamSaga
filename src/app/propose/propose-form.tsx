@@ -124,7 +124,7 @@ export function ProposeForm({ topics }: ProposeFormProps) {
                                         </p>
                                         <div className="space-y-3">
                                             {similarProposals.map(p => (
-                                                <ProposalCard key={p.id} proposal={p} />
+                                                <ProposalCard key={p.id} proposal={p} topicId={topicId} />
                                             ))}
                                         </div>
                                     </div>
