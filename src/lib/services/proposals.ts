@@ -40,10 +40,10 @@ export async function createProposal(data: CreateProposalData) {
 export async function getProposalsByTopicId(topicId: string) {
     const supabase = await createClient();
 
-    // For now, we'll count votes in a separate query until we have the votes table
+    // Fetch proposals with vote counts in a single query
     const { data, error } = await supabase
         .from("proposals")
-        .select("*")
+        .select("*, votes!left(id)")
         .eq("topic_id", topicId)
         .is("archived_at", null)
         .order("created_at", { ascending: false });
@@ -52,16 +52,16 @@ export async function getProposalsByTopicId(topicId: string) {
         throw new Error(`Error fetching proposals: ${error.message}`);
     }
 
-    // Add mock vote count for now (until votes table is implemented)
+    // Map snake_case to camelCase and count votes
     const proposalsWithCount = data.map((proposal) => ({
         ...proposal,
-        // Map snake_case to camelCase for TypeScript
         topicId: proposal.topic_id,
         userId: proposal.user_id,
         createdAt: proposal.created_at,
         updatedAt: proposal.updated_at,
         archivedAt: proposal.archived_at,
-        _count: { votes: 0 }, // Mocked until votes table exists
+        _count: { votes: (proposal.votes as any[])?.filter((v: any) => v.id !== null).length || 0 },
+        votes: undefined, // Remove the votes array from the response
     }));
 
     return proposalsWithCount as unknown as Proposal[];
@@ -85,13 +85,18 @@ export async function searchSimilarProposals(query: string, topicId: string, thr
             return [];
         }
 
-        // Map to Proposal type with vote counts
+        // Get real vote counts
+        const proposalIds = (data || []).map((p: any) => p.id);
+        const { getVoteCountsForProposals } = await import("./votes");
+        const voteCounts = await getVoteCountsForProposals(proposalIds);
+
+        // Map to Proposal type with real vote counts
         const proposals = (data || []).map((proposal: any) => ({
             ...proposal,
             topicId: proposal.topic_id,
             userId: proposal.user_id,
             createdAt: proposal.created_at,
-            _count: { votes: 0 }, // Mocked until votes table exists
+            _count: { votes: voteCounts.get(proposal.id) || 0 },
         }));
 
         return proposals as Proposal[];

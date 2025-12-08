@@ -101,3 +101,59 @@ export async function archiveProposal(
     revalidatePath("/");
     return { success: true, message: "Proposal archived successfully", error: null };
 }
+
+export async function voteProposal(
+    proposalId: string,
+    topicId: string
+): Promise<ActionState> {
+    const supabase = await createClient();
+
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        return { success: false, message: null, error: "You must be logged in to vote" };
+    }
+
+    if (!proposalId) {
+        return { success: false, message: null, error: "Proposal ID is required" };
+    }
+
+    try {
+        const { createVote } = await import("@/lib/services/votes");
+        await createVote({ proposalId, userId: user.id });
+    } catch (error: any) {
+        console.error("Error voting on proposal:", error);
+        return { success: false, message: null, error: error.message || "Failed to vote" };
+    }
+
+    revalidatePath(`/topic/${topicId}`);
+    return { success: true, message: "Vote recorded", error: null };
+}
+
+export async function unvoteProposal(
+    proposalId: string,
+    topicId: string
+): Promise<ActionState> {
+    const supabase = await createClient();
+
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        return { success: false, message: null, error: "You must be logged in to remove your vote" };
+    }
+
+    if (!proposalId) {
+        return { success: false, message: null, error: "Proposal ID is required" };
+    }
+
+    try {
+        const { removeVote } = await import("@/lib/services/votes");
+        await removeVote({ proposalId, userId: user.id });
+    } catch (error: any) {
+        console.error("Error removing vote:", error);
+        return { success: false, message: null, error: error.message || "Failed to remove vote" };
+    }
+
+    revalidatePath(`/topic/${topicId}`);
+    return { success: true, message: "Vote removed", error: null };
+}

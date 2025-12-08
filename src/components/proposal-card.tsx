@@ -9,7 +9,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
 import { Proposal } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { archiveProposal } from "@/app/propose/actions";
+import { archiveProposal, voteProposal, unvoteProposal } from "@/app/propose/actions";
 
 interface ProposalCardProps {
     proposal: Proposal;
@@ -40,6 +40,9 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false, curr
     const isOwner = currentUserId && currentUserId === userId;
 
     const handleVote = () => {
+        if (!topicId) return;
+
+        // Optimistic update
         if (hasVoted) {
             setVoteCount(prev => prev - 1);
             setHasVoted(false);
@@ -47,6 +50,24 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false, curr
             setVoteCount(prev => prev + 1);
             setHasVoted(true);
         }
+
+        startTransition(async () => {
+            const result = hasVoted
+                ? await unvoteProposal(proposal.id, topicId)
+                : await voteProposal(proposal.id, topicId);
+
+            if (!result.success) {
+                // Revert on error
+                if (hasVoted) {
+                    setVoteCount(prev => prev + 1);
+                    setHasVoted(true);
+                } else {
+                    setVoteCount(prev => prev - 1);
+                    setHasVoted(false);
+                }
+                console.error("Failed to update vote:", result.error);
+            }
+        });
     };
 
     const handleArchive = () => {

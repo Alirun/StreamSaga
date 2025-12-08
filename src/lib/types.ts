@@ -43,4 +43,7 @@ export type Vote = {
     id: string;
     proposalId: string;
     userId: string;
+    createdAt: string;
+    updatedAt: string;
+    archivedAt?: string;
 };

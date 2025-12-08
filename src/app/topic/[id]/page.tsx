@@ -44,6 +44,13 @@ export default async function TopicPage({ params }: { params: Params }) {
     const userId = getUserId(topic);
     const currentUserId = user?.id;
 
+    // Fetch user's votes for these proposals
+    let userVotes = new Set<string>();
+    if (currentUserId && proposals.length > 0) {
+        const { getUserVotesForProposals } = await import("@/lib/services/votes");
+        userVotes = await getUserVotesForProposals(currentUserId, proposals.map(p => p.id));
+    }
+
     return (
         <main className="min-h-screen bg-background">
             <div className="container px-4 md:px-6 py-8 mx-auto max-w-4xl">
@@ -104,6 +111,7 @@ export default async function TopicPage({ params }: { params: Params }) {
                                 <ProposalCard
                                     key={proposal.id}
                                     proposal={proposal}
+                                    hasVoted={userVotes.has(proposal.id)}
                                     currentUserId={currentUserId}
                                     topicId={id}
                                 />

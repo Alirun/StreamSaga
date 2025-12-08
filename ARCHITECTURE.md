@@ -58,6 +58,7 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │       └── services/        # Business Logic & Data Access
 │           ├── topics.ts    # Topic operations
 │           ├── proposals.ts # Proposal operations
+│           ├── votes.ts     # Vote operations (create, remove, count)
 │           ├── openai.ts    # OpenAI embedding generation
 │           └── realtime.ts  # Realtime subscriptions
 ```
@@ -155,3 +156,9 @@ To ensure testability and separation of concerns, business logic is abstracted f
 - `id`, `title`, `description`, `topic_id`, `user_id`, `created_at`, `updated_at`, `archived_at`, `embedding`
 - RLS: Public read (non-archived), Authenticated insert (for open topics), Owner update (soft-delete via archived_at)
 - No hard deletes allowed - only soft-delete via `archived_at`
+
+#### Votes Table
+- `id`, `proposal_id`, `user_id`, `created_at`, `updated_at`, `archived_at`
+- Unique constraint on `(user_id, proposal_id)` for non-archived votes
+- RLS: Public read (non-archived), Authenticated insert, Owner update (soft-delete via archived_at)
+- Soft-delete pattern: unvoting sets `archived_at`, re-voting clears it
