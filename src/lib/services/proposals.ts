@@ -72,6 +72,24 @@ export async function searchSimilarProposals(query: string, topicId: string, thr
     const supabase = await createClient();
 
     try {
+        // Rate limit check
+        let env: Cloudflare.Env | undefined;
+        try {
+            const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+            const context = await getCloudflareContext();
+            env = context?.env as Cloudflare.Env;
+        } catch {
+            // Ignore context loading errors (e.g. local dev)
+        }
+
+        if (env?.EMBEDDING_LIMITER) {
+            const { success } = await env.EMBEDDING_LIMITER.limit({ key: "search-similar" });
+            if (!success) {
+                console.warn("Rate limit exceeded for embedding search");
+                return [];
+            }
+        }
+
         const embedding = await generateEmbedding(query);
 
         const { data, error } = await supabase.rpc("match_proposals", {

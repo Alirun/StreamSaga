@@ -11,6 +11,7 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 - **Icons**: Lucide React
 - **Utilities**: `clsx`, `tailwind-merge`
 - **AI**: OpenAI SDK
+- **Deployment**: Cloudflare Workers (via OpenNext)
 
 ## Project Structure
 
@@ -130,7 +131,7 @@ To ensure testability and separation of concerns, business logic is abstracted f
 ### 6. Create Proposal (`src/app/propose/`)
 - **Server/Client Split**: `page.tsx` (Server) fetches open topics, `propose-form.tsx` (Client) handles form.
 - **Multi-step Form**: Topic selection, Similarity Check (vector search), and Submission.
-- **Similarity Search**: Uses OpenAI embeddings with `match_proposals` RPC to find similar proposals (threshold ≥ 0.3).
+- **Similarity Search**: Uses OpenAI embeddings with `match_proposals` RPC to find similar proposals (threshold ≥ 0.3). Rate limited via Cloudflare Workers binding.
 - **Server Actions**: `createProposal` handles auth, validation, and delegates to proposals service. `archiveProposal` allows owners to soft-delete their proposals.
 - **Embeddings**: Generates vector embeddings from title + description using `src/lib/services/openai.ts`.
 
@@ -179,3 +180,14 @@ To ensure testability and separation of concerns, business logic is abstracted f
 - **ProposalCard**: Delete button hidden for approved proposals
 - **Topic Page**: "Submit Proposal" button hidden for closed topics
 - **Admin TopicList**: "Manage" button shows for open topics to access resolve dialog
+
+### 10. Deployment
+- **Platform**: Cloudflare Workers
+- **Adapter**: `@opennextjs/cloudflare`
+- **Configuration**:
+    - `wrangler.jsonc`: Worker configuration with `nodejs_compat`.
+    - `open-next.config.ts`: OpenNext build configuration.
+    - `public/_headers`: Static asset caching.
+- **Commands**:
+    - `npm run preview`: Local preview in Workers runtime.
+    - `npm run deploy`: Deploy to Cloudflare.
