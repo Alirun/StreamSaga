@@ -153,12 +153,29 @@ To ensure testability and separation of concerns, business logic is abstracted f
 - RLS: Public read, Admin insert/update
 
 #### Proposals Table
-- `id`, `title`, `description`, `topic_id`, `user_id`, `created_at`, `updated_at`, `archived_at`, `embedding`
-- RLS: Public read (non-archived), Authenticated insert (for open topics), Owner update (soft-delete via archived_at)
+- `id`, `title`, `description`, `topic_id`, `user_id`, `created_at`, `updated_at`, `archived_at`, `approved_at`, `embedding`
+- RLS: Public read (non-archived), Authenticated insert (for open topics), Owner update (for non-approved proposals only)
 - No hard deletes allowed - only soft-delete via `archived_at`
+- Approved proposals (`approved_at` set) cannot be modified by owners - enforced at RLS and service layer
 
 #### Votes Table
 - `id`, `proposal_id`, `user_id`, `created_at`, `updated_at`, `archived_at`
 - Unique constraint on `(user_id, proposal_id)` for non-archived votes
 - RLS: Public read (non-archived), Authenticated insert, Owner update (soft-delete via archived_at)
 - Soft-delete pattern: unvoting sets `archived_at`, re-voting clears it
+
+### 9. Proposal Approval Workflow
+
+#### Admin Approval Flow (`src/app/admin/`)
+- **ResolveTopicDialog**: Modal for selecting proposals to approve
+- **resolveTopicWithApprovals action**: Approves selected proposals and closes topic in single transaction
+- When a topic is resolved:
+  - Selected proposals get `approved_at` timestamp set
+  - Topic status changes to `closed`
+  - No more new proposals can be submitted to closed topics
+
+#### UI Indicators
+- **ProposalCard**: Shows "Approved" badge with green highlight for approved proposals
+- **ProposalCard**: Delete button hidden for approved proposals
+- **Topic Page**: "Submit Proposal" button hidden for closed topics
+- **Admin TopicList**: "Manage" button shows for open topics to access resolve dialog

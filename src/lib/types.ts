@@ -34,6 +34,7 @@ export type Proposal = {
     createdAt: string;
     updatedAt: string;
     archivedAt?: string;
+    approvedAt?: string;
     _count?: {
         votes: number;
     };

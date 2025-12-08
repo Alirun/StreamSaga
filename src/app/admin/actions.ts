@@ -58,3 +58,66 @@ export async function findSimilarTopics(title: string) {
         return [];
     }
 }
+
+export async function resolveTopicWithApprovals(
+    topicId: string,
+    approvedProposalIds: string[]
+): Promise<ActionState> {
+    const supabase = await createClient();
+
+    // Check authentication and admin role
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        return { success: false, message: null, error: "Unauthorized" };
+    }
+
+    const role = user.app_metadata?.role;
+    if (role !== "admin") {
+        return { success: false, message: null, error: "Admin access required" };
+    }
+
+    try {
+        // Import services
+        const { approveProposals } = await import("@/lib/services/proposals");
+        const { updateTopicStatus } = await import("@/lib/services/topics");
+
+        // Approve selected proposals
+        if (approvedProposalIds.length > 0) {
+            await approveProposals(approvedProposalIds);
+        }
+
+        // Close the topic
+        await updateTopicStatus(topicId, "closed");
+    } catch (error: any) {
+        console.error("Error resolving topic:", error);
+        return { success: false, message: null, error: error.message || "Failed to resolve topic" };
+    }
+
+    revalidatePath("/admin");
+    revalidatePath(`/topic/${topicId}`);
+    revalidatePath("/");
+    return { success: true, message: "Topic resolved successfully", error: null };
+}
+
+export async function getProposalsForTopic(topicId: string) {
+    const supabase = await createClient();
+
+    // Check authentication and admin role
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+        return [];
+    }
+
+    const role = user.app_metadata?.role;
+    if (role !== "admin") {
+        return [];
+    }
+
+    try {
+        const { getProposalsByTopicId } = await import("@/lib/services/proposals");
+        return await getProposalsByTopicId(topicId);
+    } catch (error) {
+        console.error("Error fetching proposals:", error);
+        return [];
+    }
+}

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowBigUp, Trash2 } from "lucide-react";
+import { ArrowBigUp, Trash2, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { UserAvatar } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
@@ -38,6 +39,7 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false, curr
     const createdAt = getCreatedAt(proposal);
     const userId = getUserId(proposal);
     const isOwner = currentUserId && currentUserId === userId;
+    const isApproved = !!(proposal.approvedAt || (proposal as any).approved_at);
 
     const handleVote = () => {
         if (!topicId) return;
@@ -94,7 +96,10 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false, curr
 
     return (
         <>
-            <Card className="border-border/50 bg-card/50 hover:bg-card transition-all duration-300">
+            <Card className={cn(
+                "border-border/50 bg-card/50 hover:bg-card transition-all duration-300",
+                isApproved && "border-green-500/50 bg-green-500/5"
+            )}>
                 <div className="flex flex-row">
                     {/* Vote Section */}
                     <div className="flex flex-col items-center justify-start p-4 pr-0 gap-1">
@@ -118,10 +123,18 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false, curr
                     <div className="flex-1">
                         <CardHeader className="pb-2">
                             <div className="flex items-start justify-between gap-2">
-                                <CardTitle className="text-lg font-medium leading-snug">
-                                    {proposal.title}
-                                </CardTitle>
-                                {isOwner && topicId && (
+                                <div className="flex items-center gap-2">
+                                    <CardTitle className="text-lg font-medium leading-snug">
+                                        {proposal.title}
+                                    </CardTitle>
+                                    {isApproved && (
+                                        <Badge variant="success" className="shrink-0">
+                                            <Check className="h-3 w-3 mr-1" />
+                                            Approved
+                                        </Badge>
+                                    )}
+                                </div>
+                                {isOwner && topicId && !isApproved && (
                                     <Button
                                         variant="ghost"
                                         size="icon"

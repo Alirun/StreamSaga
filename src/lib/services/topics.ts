@@ -118,3 +118,18 @@ export async function searchSimilarTopics(query: string) {
         return [];
     }
 }
+
+export async function updateTopicStatus(topicId: string, status: TopicStatus) {
+    // Use admin client for admin operations
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const supabase = createAdminClient();
+
+    const { error } = await supabase
+        .from("topics")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", topicId);
+
+    if (error) {
+        throw new Error(`Error updating topic status: ${error.message}`);
+    }
+}

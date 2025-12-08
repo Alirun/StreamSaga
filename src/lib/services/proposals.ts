@@ -60,6 +60,7 @@ export async function getProposalsByTopicId(topicId: string) {
         createdAt: proposal.created_at,
         updatedAt: proposal.updated_at,
         archivedAt: proposal.archived_at,
+        approvedAt: proposal.approved_at,
         _count: { votes: (proposal.votes as any[])?.filter((v: any) => v.id !== null).length || 0 },
         votes: undefined, // Remove the votes array from the response
     }));
@@ -111,6 +112,21 @@ export async function archiveProposal(proposalId: string, userId: string) {
     const { createAdminClient } = await import("@/lib/supabase/admin");
     const supabase = createAdminClient();
 
+    // Check if proposal is approved - approved proposals cannot be archived
+    const { data: proposal, error: checkError } = await supabase
+        .from("proposals")
+        .select("approved_at")
+        .eq("id", proposalId)
+        .single();
+
+    if (checkError) {
+        throw new Error(`Error checking proposal: ${checkError.message}`);
+    }
+
+    if (proposal?.approved_at) {
+        throw new Error("Approved proposals cannot be modified");
+    }
+
     const { error } = await supabase
         .from("proposals")
         .update({ archived_at: new Date().toISOString() })
@@ -138,3 +154,23 @@ export async function getProposalCountByTopicId(topicId: string): Promise<number
 
     return count || 0;
 }
+
+export async function approveProposals(proposalIds: string[]) {
+    if (proposalIds.length === 0) {
+        return;
+    }
+
+    // Use admin client for admin operations
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const supabase = createAdminClient();
+
+    const { error } = await supabase
+        .from("proposals")
+        .update({ approved_at: new Date().toISOString() })
+        .in("id", proposalIds);
+
+    if (error) {
+        throw new Error(`Error approving proposals: ${error.message}`);
+    }
+}
+
