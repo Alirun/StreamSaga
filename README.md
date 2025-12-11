@@ -20,6 +20,18 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Making a User an Admin
+
+To grant admin privileges to a user, run the following SQL command in your Supabase SQL editor:
+
+```sql
+UPDATE auth.users
+SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}'
+WHERE email = 'user@example.com';
+```
+
+Replace `user@example.com` with the email address of the user you want to make an admin.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
