@@ -33,5 +33,11 @@
                 "period": 60
             }
         }
+    ],
+    "routes": [
+        {
+            "pattern": "streamsaga.space",
+            "custom_domain": true
+        }
     ]
 }
