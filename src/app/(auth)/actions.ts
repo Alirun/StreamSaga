@@ -31,6 +31,9 @@ export async function signup(formData: FormData) {
     const password = formData.get('password') as string
     const name = formData.get('name') as string
 
+    const headersList = await import('next/headers').then(mod => mod.headers())
+    const origin = headersList.get('origin') || process.env.NEXT_PUBLIC_SUPABASE_URL // Fallback if needed, but origin should exist
+
     const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -38,6 +41,7 @@ export async function signup(formData: FormData) {
             data: {
                 full_name: name,
             },
+            emailRedirectTo: `${origin}/auth/callback`,
         },
     })
 
