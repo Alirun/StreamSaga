@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Twitch, Loader2, Wallet } from "lucide-react";
 import { useActionState, useState } from "react";
 
@@ -33,6 +33,8 @@ const initialState: ActionState = {
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const successMessage = searchParams.get('message');
     const [web3Error, setWeb3Error] = useState<string | null>(null);
     const [isWeb3Loading, setIsWeb3Loading] = useState(false);
 
@@ -110,6 +112,11 @@ export default function LoginPage() {
                         </span>
                     </div>
                 </div>
+                {successMessage && (
+                    <div className="p-3 text-sm text-green-500 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
+                        {successMessage}
+                    </div>
+                )}
                 <form action={formAction} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
@@ -118,6 +125,11 @@ export default function LoginPage() {
                     <div className="space-y-2">
                         <Label htmlFor="password">Password</Label>
                         <Input id="password" name="password" type="password" required />
+                        <div className="text-right">
+                            <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-primary">
+                                Forgot password?
+                            </Link>
+                        </div>
                     </div>
                     {state?.error && (
                         <p className="text-sm text-red-500">{state.error}</p>

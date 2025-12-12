@@ -25,6 +25,8 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │   │   ├── (auth)/          # Authentication Pages (Route Group)
 │   │   │   ├── login/       # Sign In Page
 │   │   │   ├── signup/      # Sign Up Page
+│   │   │   ├── forgot-password/ # Password Reset Request Page
+│   │   │   ├── reset-password/  # New Password Entry Page
 │   │   │   ├── actions.ts   # Auth Server Actions
 │   │   │   └── layout.tsx   # Auth Layout (Centered)
 │   │   ├── auth/
@@ -99,6 +101,7 @@ Reusable components follow a "shadcn/ui-like" pattern:
 - **Middleware**: `src/middleware.ts` ensures session persistence and implements **Role-Based Access Control (RBAC)**.
     - Gates access to `/admin` routes based on `user.app_metadata.role === 'admin'`.
 - **Callback Route**: `/auth/callback` handles the PKCE code exchange.
+- **Password Reset**: Two-step flow via `/forgot-password` (requests reset email) and `/reset-password` (sets new password after email link click).
 - **UI State**: Navbar and pages react to the user's session state.
 
 ### 2. Server Actions Pattern
