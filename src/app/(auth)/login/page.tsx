@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Twitch, Loader2, Wallet } from "lucide-react";
-import { useActionState, useState } from "react";
+import { Suspense, useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,21 @@ const initialState: ActionState = {
 };
 
 export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <Card className="w-full max-w-md">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+                    <CardDescription>Loading...</CardDescription>
+                </CardHeader>
+            </Card>
+        }>
+            <LoginPageContent />
+        </Suspense>
+    );
+}
+
+function LoginPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const successMessage = searchParams.get('message');
