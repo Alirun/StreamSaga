@@ -1,8 +1,9 @@
 'use client'
 
 import Link from "next/link";
-import { Twitch, Loader2 } from "lucide-react";
-import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { Twitch, Loader2, Wallet } from "lucide-react";
+import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createClient } from "@/lib/supabase/client";
 import { login, signInWithTwitch } from "../actions";
 
 interface ActionState {
@@ -30,9 +32,40 @@ const initialState: ActionState = {
 };
 
 export default function LoginPage() {
+    const router = useRouter();
+    const [web3Error, setWeb3Error] = useState<string | null>(null);
+    const [isWeb3Loading, setIsWeb3Loading] = useState(false);
+
     const [state, formAction, isPending] = useActionState(async (prevState: ActionState, formData: FormData) => {
         return await login(formData);
     }, initialState);
+
+    const handleWeb3SignIn = async () => {
+        setWeb3Error(null);
+        setIsWeb3Loading(true);
+
+        try {
+            const supabase = createClient();
+            const { error } = await supabase.auth.signInWithWeb3({
+                chain: 'ethereum',
+            });
+
+            if (error) {
+                setWeb3Error(error.message);
+            } else {
+                router.push('/');
+                router.refresh();
+            }
+        } catch {
+            if (typeof window !== 'undefined' && !(window as Window & { ethereum?: unknown }).ethereum) {
+                setWeb3Error('No Ethereum wallet found. Please install MetaMask or another Web3 wallet.');
+            } else {
+                setWeb3Error('Failed to sign in with wallet. Please try again.');
+            }
+        } finally {
+            setIsWeb3Loading(false);
+        }
+    };
 
     return (
         <Card className="w-full max-w-md">
@@ -43,12 +76,30 @@ export default function LoginPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <form action={signInWithTwitch}>
-                    <Button className="w-full bg-[#9146FF] hover:bg-[#7d2eff] text-white" size="lg">
-                        <Twitch className="mr-2 h-4 w-4" />
-                        Sign in with Twitch
+                <div className="grid grid-cols-2 gap-3">
+                    <form action={signInWithTwitch}>
+                        <Button className="w-full bg-[#9146FF] hover:bg-[#7d2eff] text-white" size="lg">
+                            <Twitch className="mr-2 h-4 w-4" />
+                            Twitch
+                        </Button>
+                    </form>
+                    <Button
+                        className="w-full bg-[#627EEA] hover:bg-[#4a6cd4] text-white"
+                        size="lg"
+                        onClick={handleWeb3SignIn}
+                        disabled={isWeb3Loading}
+                    >
+                        {isWeb3Loading ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Wallet className="mr-2 h-4 w-4" />
+                        )}
+                        Ethereum
                     </Button>
-                </form>
+                </div>
+                {web3Error && (
+                    <p className="text-sm text-red-500">{web3Error}</p>
+                )}
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />

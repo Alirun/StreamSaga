@@ -95,7 +95,7 @@ Reusable components follow a "shadcn/ui-like" pattern:
 ## Key Flows & Implementation Details
 
 ### 1. Authentication
-- **Supabase Auth**: Handles user management via Email/Password and Twitch OAuth.
+- **Supabase Auth**: Handles user management via Email/Password, Twitch OAuth, and **Ethereum Web3** (Sign-In With Ethereum/EIP-4361).
 - **Middleware**: `src/middleware.ts` ensures session persistence and implements **Role-Based Access Control (RBAC)**.
     - Gates access to `/admin` routes based on `user.app_metadata.role === 'admin'`.
 - **Callback Route**: `/auth/callback` handles the PKCE code exchange.
