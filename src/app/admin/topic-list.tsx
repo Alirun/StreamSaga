@@ -10,6 +10,7 @@ import { Topic } from "@/lib/types";
 import { subscribeToTopics } from "@/lib/services/realtime";
 import { ResolveTopicDialog } from "./resolve-topic-dialog";
 import { archiveTopic } from "./actions";
+import { RelativeTime } from "@/components/relative-time";
 
 interface TopicListProps {
     initialTopics: Topic[];
@@ -114,7 +115,7 @@ export function TopicList({ initialTopics }: TopicListProps) {
                                     {/* Note: _count is not available in realtime payload usually, might need separate handling or just show 0/refresh for now */}
                                     <td className="p-4">{topic._count?.proposals || 0}</td>
                                     <td className="p-4">
-                                        {new Date(topic.createdAt || topic.created_at || new Date().toISOString()).toLocaleDateString()}
+                                        <RelativeTime date={topic.createdAt || topic.created_at || new Date().toISOString()} />
                                     </td>
                                     <td className="p-4 text-right">
                                         <div className="flex justify-end gap-2">
