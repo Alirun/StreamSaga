@@ -3,7 +3,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import { getTopicById } from "@/lib/services/topics";
 import { getProposalsByTopicId } from "@/lib/services/proposals";
 import { createClient } from "@/lib/supabase/server";
-import { ProposalCard } from "@/components/proposal-card";
+import { ProposalsList } from "./proposals-list";
 import { UserAvatar } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ function getUserId(topic: Topic): string {
 
 export default async function TopicPage({ params }: { params: Params }) {
     const { id } = await params;
+
     const [topic, supabase] = await Promise.all([
         getTopicById(id),
         createClient()
@@ -86,7 +87,7 @@ export default async function TopicPage({ params }: { params: Params }) {
                     </div>
 
                     {topic.status === 'open' && (
-                        <Link href="/propose">
+                        <Link href={`/propose?topic=${id}`}>
                             <Button size="lg" className="w-full md:w-auto shadow-lg shadow-primary/20">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Submit Proposal
@@ -96,34 +97,15 @@ export default async function TopicPage({ params }: { params: Params }) {
                 </div>
 
                 {/* Proposals List */}
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b border-border pb-4">
-                        <h2 className="text-xl font-semibold">Proposals ({proposals.length})</h2>
-                        <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">Top</Button>
-                            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">Newest</Button>
-                        </div>
-                    </div>
-
-                    <div className="grid gap-4">
-                        {proposals.length > 0 ? (
-                            proposals.map((proposal) => (
-                                <ProposalCard
-                                    key={proposal.id}
-                                    proposal={proposal}
-                                    hasVoted={userVotes.has(proposal.id)}
-                                    currentUserId={currentUserId}
-                                    topicId={id}
-                                />
-                            ))
-                        ) : (
-                            <div className="text-center py-12 border border-dashed rounded-lg">
-                                <p className="text-muted-foreground">No proposals yet. Be the first!</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <ProposalsList
+                    proposals={proposals}
+                    topicId={id}
+                    currentUserId={currentUserId}
+                    userVotes={userVotes}
+                />
             </div>
         </main>
     );
 }
+
+

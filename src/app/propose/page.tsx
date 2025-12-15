@@ -1,8 +1,19 @@
 import { getTopicsByStatus } from "@/lib/services/topics";
 import { ProposeForm } from "./propose-form";
 
-export default async function ProposePage() {
-    const topics = await getTopicsByStatus("open");
+// In Next.js 15+, searchParams is a Promise
+type SearchParams = Promise<{ topic?: string }>;
 
-    return <ProposeForm topics={topics} />;
+export default async function ProposePage({
+    searchParams,
+}: {
+    searchParams: SearchParams;
+}) {
+    const [topics, search] = await Promise.all([
+        getTopicsByStatus("open"),
+        searchParams,
+    ]);
+
+    return <ProposeForm topics={topics} initialTopicId={search.topic} />;
 }
+

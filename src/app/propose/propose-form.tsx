@@ -14,6 +14,7 @@ import { createProposal, findSimilarProposals, ActionState } from "./actions";
 
 interface ProposeFormProps {
     topics: Topic[];
+    initialTopicId?: string;
 }
 
 const initialState: ActionState = {
@@ -22,12 +23,14 @@ const initialState: ActionState = {
     error: null,
 };
 
-export function ProposeForm({ topics }: ProposeFormProps) {
+export function ProposeForm({ topics, initialTopicId }: ProposeFormProps) {
     const [step, setStep] = useState<1 | 2>(1);
     const [isChecking, setIsChecking] = useState(false);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [topicId, setTopicId] = useState(topics[0]?.id || "");
+    // Use initialTopicId if provided and valid, otherwise first topic
+    const validInitialTopic = initialTopicId && topics.some(t => t.id === initialTopicId);
+    const [topicId, setTopicId] = useState(validInitialTopic ? initialTopicId : topics[0]?.id || "");
     const [similarProposals, setSimilarProposals] = useState<Proposal[]>([]);
     const [state, formAction, isPending] = useActionState(createProposal, initialState);
 

@@ -45,8 +45,7 @@ export async function getProposalsByTopicId(topicId: string) {
         .from("proposals")
         .select("*, votes!left(id)")
         .eq("topic_id", topicId)
-        .is("archived_at", null)
-        .order("created_at", { ascending: false });
+        .is("archived_at", null);
 
     if (error) {
         throw new Error(`Error fetching proposals: ${error.message}`);
