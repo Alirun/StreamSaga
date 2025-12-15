@@ -22,7 +22,7 @@
 	},
 	"vars": {
 		"NEXT_PUBLIC_SUPABASE_URL": "https://vydcwubtpuhwkgzzgtqj.supabase.co",
-		"NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5ZGN3dWJ0cHVod2tnenpndHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyNjIwNDEsImV4cCI6MjA3OTgzODA0MX0.9HoM993iiXP4589IiDYJU4nzCFW4BE2_9A-SxfJ57Rw",
+		"NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_9-KAmLM-cE-4LiAe11mGxQ__HSpZGgR",
 		"NEXT_PUBLIC_APP_URL": "https://streamsaga.space"
 	},
 	"ratelimits": [
