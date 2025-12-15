@@ -12,9 +12,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteName = "StreamSaga";
+const title = siteName;
+const description = "Propose and vote for projects to be built live.";
+
 export const metadata: Metadata = {
-  title: "StreamSaga",
-  description: "Propose and vote for projects to be built live.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://streamsaga.space"),
+  title,
+  description,
+  openGraph: {
+    url: "/",
+    title,
+    description,
+    siteName,
+    type: "website",
+    // TODO: Add locale-specific OG images: `/images/og/og-${locale}.png`
+    // images: [ogImagePath],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    // TODO: Add locale-specific Twitter images: `/images/og/og-${locale}.png`
+    // images: [ogImagePath],
+  },
 };
 
 import { Navbar } from "@/components/navbar";

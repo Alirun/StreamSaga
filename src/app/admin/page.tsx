@@ -5,6 +5,12 @@ import { TopicList } from "./topic-list";
 import { NewTopicDialog } from "./new-topic-dialog";
 import { getTopics } from "@/lib/services/topics";
 import { Topic } from "@/lib/types";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Admin Dashboard | StreamSaga",
+    description: "Manage topics and proposals.",
+};
 
 export default async function AdminPage() {
     const topics = await getTopics();

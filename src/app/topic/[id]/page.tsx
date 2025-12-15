@@ -10,9 +10,26 @@ import { RelativeTime } from "@/components/relative-time";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
 import { Topic } from "@/lib/types";
+import type { Metadata } from "next";
 
 // In Next.js 15+, params is a Promise
 type Params = Promise<{ id: string }>;
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+    const { id } = await params;
+    const topic = await getTopicById(id);
+
+    if (!topic) {
+        return {
+            title: "Topic Not Found | StreamSaga",
+        };
+    }
+
+    return {
+        title: `${topic.title} | StreamSaga`,
+        description: `View and submit proposals for: ${topic.title}`,
+    };
+}
 
 // Get creation date from either camelCase or snake_case field
 function getCreatedAt(topic: Topic): string {

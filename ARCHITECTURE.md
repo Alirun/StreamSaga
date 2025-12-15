@@ -21,6 +21,8 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │   └── migrations/      # Database migrations
 ├── src/
 │   ├── middleware.ts        # Root middleware for session management & RBAC
+│   ├── robots.ts            # SEO: Robots.txt configuration
+│   ├── sitemap.ts           # SEO: Dynamic sitemap generation
 │   ├── app/                 # App Router pages and layouts
 │   │   ├── (auth)/          # Authentication Pages (Route Group)
 │   │   │   ├── login/       # Sign In Page
@@ -41,8 +43,9 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │   │   │   ├── propose-form.tsx # Multi-step Proposal Form
 │   │   │   └── page.tsx     # Proposal Page Entry
 │   │   ├── topic/           # Topic Details
+│   │   ├── icon.tsx         # Dynamic favicon (Zap icon)
 │   │   ├── globals.css      # Global styles & Design System variables
-│   │   ├── layout.tsx       # Root layout with Navbar
+│   │   ├── layout.tsx       # Root layout with Navbar & SEO metadata
 │   │   └── page.tsx         # Public Dashboard (Home)
 │   ├── components/          # React components
 │   │   ├── ui/              # Reusable UI primitives
@@ -196,7 +199,32 @@ To ensure testability and separation of concerns, business logic is abstracted f
 - **Topic Page**: "Submit Proposal" button hidden for closed topics
 - **Admin TopicList**: "Manage" button shows for open topics to access resolve dialog
 
-### 10. Deployment
+### 10. SEO
+
+#### Sitemap (`src/sitemap.ts`)
+- Dynamic sitemap generation including all static and topic pages
+- Excludes archived topics
+- Uses `NEXT_PUBLIC_APP_URL` for absolute URLs
+
+#### Robots (`src/robots.ts`)
+- Standard robots.txt configuration
+- References sitemap URL
+
+#### OpenGraph & Twitter Metadata (`src/app/layout.tsx`)
+- Site-wide OpenGraph and Twitter card metadata
+- `metadataBase` configured for proper URL resolution
+- Images placeholders (TODO) for future locale-specific OG images
+
+#### Dynamic Favicon (`src/app/icon.tsx`)
+- Generated using Next.js ImageResponse
+- Matches logo design (Zap icon with primary purple color)
+
+#### Dynamic Page Titles
+- Each page exports metadata with page-specific title
+- Title pattern: `{Page Title} | StreamSaga`
+- Topic pages include dynamic topic title
+
+### 11. Deployment
 - **Platform**: Cloudflare Workers
 - **Adapter**: `@opennextjs/cloudflare`
 - **Configuration**:
