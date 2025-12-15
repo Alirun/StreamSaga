@@ -58,6 +58,7 @@ StreamSaga is a Next.js application where stream viewers can propose and vote fo
 │       │   └── middleware.ts# Middleware Helper
 │       ├── types.ts         # TypeScript interfaces
 │       ├── utils.ts         # Helper functions
+│       ├── user-identity.ts # Deterministic avatar & username generation
 │       └── services/        # Business Logic & Data Access
 │           ├── topics.ts    # Topic operations
 │           ├── proposals.ts # Proposal operations
@@ -104,7 +105,18 @@ Reusable components follow a "shadcn/ui-like" pattern:
 - **Password Reset**: Two-step flow via `/forgot-password` (requests reset email) and `/reset-password` (sets new password after email link click).
 - **UI State**: Navbar and pages react to the user's session state.
 
-### 2. Server Actions Pattern
+### 2. User Identity System
+To protect user privacy while maintaining visual identity, the app generates deterministic avatars and usernames from user IDs.
+- **Location**: `src/lib/user-identity.ts`
+- **Avatar**: Uses [DiceBear](https://dicebear.com/) "Bottts" style - robot-themed SVG avatars.
+- **Username**: Robot-themed names generated from adjective + noun pairs (e.g., "Cosmic Bot", "Neon Core").
+- **Deterministic**: Same user ID always produces the same avatar and username.
+- **Components**:
+    - `UserAvatar`: Displays the DiceBear avatar image.
+    - `UserIdentityDisplay`: Combined component showing avatar + username together.
+- **Usage**: Used in topic cards, proposal cards, and topic detail pages.
+
+### 3. Server Actions Pattern
 Server Actions are used for form submissions and data mutations.
 - **Location**: Colocated with the feature (e.g., `src/app/(auth)/actions.ts` for auth).
 - **Pattern**:

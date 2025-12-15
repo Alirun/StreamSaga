@@ -52,5 +52,12 @@ export async function updateSession(request: NextRequest) {
         }
     }
 
+    // Protect /propose route - require authentication
+    if (request.nextUrl.pathname.startsWith('/propose')) {
+        if (!user) {
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
+    }
+
     return supabaseResponse
 }

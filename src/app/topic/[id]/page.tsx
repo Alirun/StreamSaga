@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { getTopicById } from "@/lib/services/topics";
 import { getProposalsByTopicId } from "@/lib/services/proposals";
 import { createClient } from "@/lib/supabase/server";
 import { ProposalsList } from "./proposals-list";
-import { UserAvatar } from "@/components/user-avatar";
+import { UserIdentityDisplay } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
-import { Button } from "@/components/ui/button";
+
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
 import { Topic } from "@/lib/types";
@@ -76,30 +76,24 @@ export default async function TopicPage({ params }: { params: Params }) {
                             </Badge>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
-                            <UserAvatar userId={userId} size="md" />
-                            <div>
-                                <span>Created by </span>
-                                <span className="text-foreground font-medium">{userId.substring(0, 8)}...</span>
-                                <span> · </span>
-                                <RelativeTime date={createdAt} />
-                            </div>
+                            <UserIdentityDisplay
+                                userId={userId}
+                                size="md"
+                                prefix="Created by"
+                            />
+                            <span> · </span>
+                            <RelativeTime date={createdAt} />
                         </div>
                     </div>
 
-                    {topic.status === 'open' && (
-                        <Link href={`/propose?topic=${id}`}>
-                            <Button size="lg" className="w-full md:w-auto shadow-lg shadow-primary/20">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Submit Proposal
-                            </Button>
-                        </Link>
-                    )}
+
                 </div>
 
                 {/* Proposals List */}
                 <ProposalsList
                     proposals={proposals}
                     topicId={id}
+                    topicStatus={topic.status}
                     currentUserId={currentUserId}
                     userVotes={userVotes}
                 />

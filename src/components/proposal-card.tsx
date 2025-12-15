@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { UserAvatar } from "@/components/user-avatar";
+import { UserIdentityDisplay } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
 import { Proposal } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -159,8 +159,7 @@ export function ProposalCard({ proposal, hasVoted: initialHasVoted = false, curr
 
                             {/* Author and time info */}
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <UserAvatar userId={userId} size="sm" />
-                                <span className="font-medium text-foreground">{userId.substring(0, 8)}...</span>
+                                <UserIdentityDisplay userId={userId} size="sm" />
                                 <span>·</span>
                                 <RelativeTime date={createdAt} />
                             </div>

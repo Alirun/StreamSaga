@@ -1,49 +1,83 @@
 import { cn } from "@/lib/utils";
+import { getAvatarUrl, getUsername } from "@/lib/user-identity";
+import Image from "next/image";
 
 interface UserAvatarProps {
     userId: string;
     size?: "sm" | "md" | "lg";
     className?: string;
+    showName?: boolean;
 }
 
-// Generate a deterministic color based on user ID
-function generateColor(userId: string): string {
-    let hash = 0;
-    for (let i = 0; i < userId.length; i++) {
-        hash = userId.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Generate HSL color with good saturation and lightness for visibility
-    const hue = Math.abs(hash % 360);
-    return `hsl(${hue}, 70%, 50%)`;
-}
-
-// Get initials from user ID (first 2 characters)
-function getInitials(userId: string): string {
-    return userId.substring(0, 2).toUpperCase();
-}
-
-const sizeClasses = {
-    sm: "w-5 h-5 text-[10px]",
-    md: "w-8 h-8 text-xs",
-    lg: "w-10 h-10 text-sm",
+const sizeConfig = {
+    sm: { pixels: 20, className: "w-5 h-5" },
+    md: { pixels: 32, className: "w-8 h-8" },
+    lg: { pixels: 40, className: "w-10 h-10" },
 };
 
-export function UserAvatar({ userId, size = "sm", className }: UserAvatarProps) {
-    const bgColor = generateColor(userId);
-    const initials = getInitials(userId);
+export function UserAvatar({ userId, size = "sm", className, showName = false }: UserAvatarProps) {
+    const config = sizeConfig[size];
+    const avatarUrl = getAvatarUrl(userId, config.pixels);
+    const username = getUsername(userId);
+
+    if (showName) {
+        return (
+            <div className={cn("flex items-center gap-2", className)}>
+                <img
+                    src={avatarUrl}
+                    alt={username}
+                    className={cn(
+                        "rounded-full bg-muted shrink-0",
+                        config.className
+                    )}
+                    width={config.pixels}
+                    height={config.pixels}
+                />
+                <span className="font-medium text-foreground">@{username}</span>
+            </div>
+        );
+    }
 
     return (
-        <div
+        <img
+            src={avatarUrl}
+            alt={username}
             className={cn(
-                "rounded-full flex items-center justify-center font-medium text-white shrink-0",
-                sizeClasses[size],
+                "rounded-full bg-muted shrink-0",
+                config.className,
                 className
             )}
-            style={{ backgroundColor: bgColor }}
-            title={`User: ${userId}`}
-        >
-            {initials}
+            width={config.pixels}
+            height={config.pixels}
+            title={`@${username}`}
+        />
+    );
+}
+
+/**
+ * Component to display user identity with avatar and username
+ * Use this when you need to show both together
+ */
+export function UserIdentityDisplay({
+    userId,
+    size = "sm",
+    prefix,
+    className
+}: {
+    userId: string;
+    size?: "sm" | "md" | "lg";
+    prefix?: string;
+    className?: string;
+}) {
+    const username = getUsername(userId);
+
+    return (
+        <div className={cn("flex items-center gap-2", className)}>
+            <UserAvatar userId={userId} size={size} />
+            <span>
+                {prefix && <span>{prefix} </span>}
+                <span className="font-medium text-foreground">@{username}</span>
+            </span>
         </div>
     );
 }

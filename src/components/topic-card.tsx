@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MessageSquare, Calendar } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UserAvatar } from "@/components/user-avatar";
+import { UserIdentityDisplay } from "@/components/user-avatar";
 import { RelativeTime } from "@/components/relative-time";
 import { Topic } from "@/lib/types";
 
@@ -53,10 +53,12 @@ export function TopicCard({ topic }: TopicCardProps) {
                     </div>
                 </CardContent>
                 <CardFooter className="pt-0">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <UserAvatar userId={userId} size="sm" />
-                        <span>Created by <span className="text-foreground font-medium">{userId.substring(0, 8)}...</span></span>
-                    </div>
+                    <UserIdentityDisplay
+                        userId={userId}
+                        size="sm"
+                        prefix="Created by"
+                        className="text-xs text-muted-foreground"
+                    />
                 </CardFooter>
             </Card>
         </Link>
