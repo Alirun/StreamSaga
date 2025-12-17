@@ -26,15 +26,13 @@ export const metadata: Metadata = {
     description,
     siteName,
     type: "website",
-    // TODO: Add locale-specific OG images: `/images/og/og-${locale}.png`
-    // images: [ogImagePath],
+
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    // TODO: Add locale-specific Twitter images: `/images/og/og-${locale}.png`
-    // images: [ogImagePath],
+
   },
 };
 

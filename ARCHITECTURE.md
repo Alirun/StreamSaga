@@ -219,11 +219,21 @@ To ensure testability and separation of concerns, business logic is abstracted f
 #### OpenGraph & Twitter Metadata (`src/app/layout.tsx`)
 - Site-wide OpenGraph and Twitter card metadata
 - `metadataBase` configured for proper URL resolution
-- Images placeholders (TODO) for future locale-specific OG images
+- Dynamic images auto-generated from `opengraph-image.tsx` and `twitter-image.tsx`
 
 #### Dynamic Favicon (`src/app/icon.tsx`)
 - Generated using Next.js ImageResponse
 - Matches logo design (Zap icon with primary purple color)
+
+#### OpenGraph Image (`src/app/opengraph-image.tsx`)
+- Dynamic 1200×630 image generated using Next.js ImageResponse
+- Dark gradient background with Zap logo and site tagline
+- Automatically served at `/opengraph-image`
+
+#### Twitter Image (`src/app/twitter-image.tsx`)
+- Dynamic 1200×630 image for Twitter `summary_large_image` cards
+- Same design as OpenGraph for consistent social sharing
+- Automatically served at `/twitter-image`
 
 #### Dynamic Page Titles
 - Each page exports metadata with page-specific title
