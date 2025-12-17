@@ -1,5 +1,11 @@
 import type { MetadataRoute } from 'next';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+
+// Use direct Supabase client (not cookie-based) for static sitemap generation
+const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://streamsaga.space';
@@ -47,7 +53,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Dynamic pages: Topics (excluding archived)
     let topicPages: MetadataRoute.Sitemap = [];
     try {
-        const supabase = await createClient();
         const { data: topics } = await supabase
             .from('topics')
             .select('id, updated_at')
