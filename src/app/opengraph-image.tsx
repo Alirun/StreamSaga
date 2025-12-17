@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { siteConfig } from '@/lib/site-config';
 
 // Image metadata - standard OG size
 export const size = {
@@ -6,7 +7,7 @@ export const size = {
     height: 630,
 };
 export const contentType = 'image/png';
-export const alt = 'StreamSaga - Propose and vote for projects to be built live';
+export const alt = `${siteConfig.name} - ${siteConfig.tagline}`;
 
 // OpenGraph image generation
 export default function OpenGraphImage() {
@@ -84,7 +85,7 @@ export default function OpenGraphImage() {
                         letterSpacing: '-2px',
                     }}
                 >
-                    StreamSaga
+                    {siteConfig.name}
                 </h1>
 
                 {/* Tagline */}
@@ -97,7 +98,7 @@ export default function OpenGraphImage() {
                         textAlign: 'center',
                     }}
                 >
-                    Propose and vote for projects to be built live
+                    {siteConfig.tagline}
                 </p>
             </div>
         ),

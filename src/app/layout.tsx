@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { siteConfig, siteMetadata } from "@/lib/site-config";
+import { Navbar } from "@/components/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,31 +14,27 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteName = "StreamSaga";
-const title = siteName;
-const description = "Propose and vote for projects to be built live.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://streamsaga.space"),
-  title,
-  description,
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || siteConfig.url),
+  title: siteMetadata.title,
+  description: siteMetadata.fullDescription,
+  keywords: [...siteConfig.keywords],
+  authors: [{ name: siteConfig.creator, url: siteConfig.links.twitch }],
+  creator: siteConfig.creator,
   openGraph: {
     url: "/",
-    title,
-    description,
-    siteName,
+    title: siteMetadata.title,
+    description: siteMetadata.fullDescription,
+    siteName: siteConfig.name,
     type: "website",
-
   },
   twitter: {
     card: "summary_large_image",
-    title,
-    description,
-
+    title: siteMetadata.title,
+    description: siteMetadata.fullDescription,
+    creator: siteConfig.creatorTwitter,
   },
 };
-
-import { Navbar } from "@/components/navbar";
 
 export default function RootLayout({
   children,
