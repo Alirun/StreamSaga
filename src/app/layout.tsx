@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { siteConfig, siteMetadata } from "@/lib/site-config";
 import { Navbar } from "@/components/navbar";
@@ -48,6 +49,11 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+        <Script
+          src="https://app.rybbit.io/api/script.js"
+          data-site-id="3bb1686d9eee"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
