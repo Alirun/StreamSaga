@@ -134,12 +134,18 @@ To ensure testability and separation of concerns, business logic is abstracted f
 - **Server Actions (`actions.ts`)**: Act as API controllers. They handle authentication checks, input parsing (FormData), and response formatting, delegating the actual work to Services.
 - **Rule**: UI Components should never call the DB directly. They use Server Actions (for mutations) or Services (for data fetching in Server Components).
 
-### 4. Dashboard (`src/app/page.tsx`)
-- **Server Component**: Fetches topics from Supabase using `getTopicsByStatus()`.
-- **Hero Section**: Introduces the app with search bar.
-- **Active Topics**: Displays open topics via `TopicGrid` with realtime updates.
-- **Closed Topics**: Displays closed topics in a separate section (if any exist).
-- **View All Toggle**: `TopicGrid` shows 3 topics initially, expandable to show all.
+### Dashboard
+- **Layout**: Split-panel design (Sidebar + Main Content). Response design with mobile tree-view.
+- **Data Fetching**:
+  - Uses `getDashboardData` server action to fetch topics, proposals, and user votes in a single optimized query.
+  - Initial load populates the entire tree structure (Topics -> Proposals).
+  - Search queries update the URL (`/?q=...`) and trigger server-side search via `getDashboardData`.
+- **Components**:
+  - `DashboardClient`: Client-side wrapper for state and layout.
+  - `TopicSidebar`: Helper to list topics (Active/Closed).
+  - `ProposalsPanel`: Displays details and proposals for selected topic.
+  - `DashboardHero`: Promotional content shown in empty states and mobile view.
+
 
 ### 5. Topic Details (`src/app/topic/[id]/page.tsx`)
 - **Dynamic Route**: Fetches topic by ID from Supabase using `getTopicById()`.

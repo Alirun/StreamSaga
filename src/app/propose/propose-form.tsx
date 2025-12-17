@@ -54,10 +54,10 @@ export function ProposeForm({ topics, initialTopicId }: ProposeFormProps) {
             <Card className="w-full max-w-2xl border-border/50 bg-card/50 backdrop-blur">
                 <CardHeader>
                     <div className="flex items-center gap-2 mb-2">
-                        <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                        <Link href={topicId ? `/topic/${topicId}` : "/"} className="text-muted-foreground hover:text-foreground transition-colors">
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
-                        <span className="text-sm text-muted-foreground">Back to Dashboard</span>
+                        <span className="text-sm text-muted-foreground">Back to Topic</span>
                     </div>
                     <CardTitle className="text-2xl">Submit a Proposal</CardTitle>
                     <CardDescription>

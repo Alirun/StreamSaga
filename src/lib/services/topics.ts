@@ -19,6 +19,8 @@ function transformTopicWithCount(topic: any): Topic {
     } as Topic;
 }
 
+
+
 export async function getTopics() {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -55,6 +57,8 @@ export async function getTopicsByStatus(status: TopicStatus, limit?: number) {
 
     return data.map(transformTopicWithCount);
 }
+
+
 
 export async function getTopicById(id: string) {
     const supabase = await createClient();

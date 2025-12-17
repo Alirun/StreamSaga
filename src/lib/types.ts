@@ -38,6 +38,10 @@ export type Proposal = {
     _count?: {
         votes: number;
     };
+    // Helper for UI to know if current user voted (populated after fetch)
+    hasVoted?: boolean;
+    // Helper to store match similarity
+    similarity?: number;
 };
 
 export type Vote = {
@@ -47,4 +51,8 @@ export type Vote = {
     createdAt: string;
     updatedAt: string;
     archivedAt?: string;
+};
+
+export type TopicWithProposals = Topic & {
+    proposals: Proposal[];
 };

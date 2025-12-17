@@ -1,65 +1,75 @@
-import { Search } from "lucide-react";
-import { getTopicsByStatus } from "@/lib/services/topics";
-import { TopicGrid } from "@/components/topic-grid";
-import { Button } from "@/components/ui/button";
+import { Suspense } from "react";
+import { DashboardClient } from "@/components/dashboard-client";
+import { getDashboardData, searchGlobal } from "@/app/actions";
+import { TopicWithProposals } from "@/lib/types";
 
-export default async function Home() {
-  const openTopics = await getTopicsByStatus("open");
-  const closedTopics = await getTopicsByStatus("closed");
+// In Next.js 15+, searchParams is a Promise
+type SearchParams = Promise<{ q?: string }>;
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const query = params.q?.trim();
+
+  let openTopics: TopicWithProposals[] = [];
+  let closedTopics: TopicWithProposals[] = [];
+  let currentUserId: string | undefined;
+  let isSearchResult = false;
+
+  if (query) {
+    // Search mode - get matching topics with their matching proposals
+    const searchResults = await searchGlobal(query);
+    // For search results, show all in "open" section (they're search results, not categorized)
+    openTopics = searchResults;
+    isSearchResult = true;
+
+    // Still need current user for vote functionality
+    const dashboardData = await getDashboardData();
+    currentUserId = dashboardData.currentUserId;
+  } else {
+    // Normal mode - get all topics
+    const dashboardData = await getDashboardData();
+    openTopics = dashboardData.openTopics.map(t => ({ ...t, proposals: [] }));
+    closedTopics = dashboardData.closedTopics.map(t => ({ ...t, proposals: [] }));
+    currentUserId = dashboardData.currentUserId;
+  }
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container px-4 md:px-6 py-16 md:py-24 mx-auto max-w-6xl">
-          <div className="flex flex-col items-center text-center space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-              Shape the Future of the Stream
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-[700px]">
-              Propose and vote for the projects, features, and tools you want to see built live in upcoming seasons.
-            </p>
-
-            {/* Search Bar */}
-            <div className="w-full max-w-md mt-8 relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              </div>
-              <input
-                type="text"
-                className="flex h-12 w-full rounded-full border border-input bg-background px-10 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm hover:shadow-md transition-all"
-                placeholder="Search topics and proposals..."
-              />
-              <div className="absolute inset-y-0 right-0 pr-1.5 flex items-center">
-                <Button size="sm" className="rounded-full h-9 px-4">
-                  Search
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Active Topics */}
-      <section className="container px-4 md:px-6 py-12 mx-auto max-w-6xl">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold tracking-tight">Active Topics</h2>
-          <p className="text-muted-foreground mt-1">Open for new proposals and voting</p>
-        </div>
-        <TopicGrid initialTopics={openTopics} status="open" previewCount={3} />
-      </section>
-
-      {/* Closed Topics */}
-      {closedTopics.length > 0 && (
-        <section className="container px-4 md:px-6 py-12 mx-auto max-w-6xl border-t border-border/40">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold tracking-tight">Recent Closed Topics</h2>
-            <p className="text-muted-foreground mt-1">Past seasons and completed projects</p>
-          </div>
-          <TopicGrid initialTopics={closedTopics} status="closed" previewCount={3} />
-        </section>
-      )}
-    </main>
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardClient
+        openTopics={openTopics}
+        closedTopics={closedTopics}
+        currentUserId={currentUserId}
+        isSearchResult={isSearchResult}
+      />
+    </Suspense>
   );
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="flex min-h-[calc(100vh-3.5rem)]">
+      {/* Sidebar skeleton */}
+      <div className="hidden lg:block w-72 shrink-0 border-r border-border/40 p-4">
+        <div className="space-y-4">
+          <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-10 bg-muted/50 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main content skeleton */}
+      <div className="flex-1 p-6">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    </div>
+  );
+}
