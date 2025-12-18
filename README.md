@@ -1,26 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StreamSaga ⚡️
 
-## Getting Started
+> **Season 1 of the [Stream Framework](https://github.com/Alirun/stream-framework)**  
+> *Every episode forged by you*
 
-First, run the development server:
+StreamSaga is a platform where stream viewers can propose and vote for projects or features to be developed live during upcoming seasons and episodes.
+
+## 🎬 Live Streams
+
+Join the live builds and participate in the decision-making process:
+
+- 🎮 **Twitch**: [twitch.tv/ali_run](https://twitch.tv/ali_run)
+- 📺 **YouTube**: [youtube.com/@ali_run](https://youtube.com/@ali_run)
+- 🟢 **Kick**: [kick.com/ali-run](https://kick.com/ali-run)
+- 🌳 **Linktree**: [linktr.ee/ali_run](https://linktr.ee/ali_run) (All social links)
+
+## 🚀 Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org) (App Router)
+- **Backend**: [Supabase](https://supabase.com) (Auth, Database, Realtime, Vector Search)
+- **Styling**: [TailwindCSS v4](https://tailwindcss.com)
+- **AI**: [OpenAI SDK](https://openai.com) (for vector embeddings)
+- **Deployment**: [Cloudflare Workers](https://workers.cloudflare.com) (via [OpenNext](https://open-next.js.org))
+
+## ✨ Key Features
+
+- **Public Dashboard**: View active topics and vote counts in real-time.
+- **Vector Search**: Semantic search across topics and proposals.
+- **Proposals**: Authenticated users can propose new ideas with automatic duplicate detection.
+- **Voting**: One vote per user per proposal.
+- **Admin Panel**: Create/edit topics and moderate proposals.
+- **Deterministic Identities**: Randomly generated animal-based usernames and avatars for users.
+
+## 🛠 Getting Started
+
+### Prerequisites
+
+- Node.js (latest LTS)
+- Supabase account and project
+- OpenAI API key
+- Cloudflare account (for deployment)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Copy `example.env` to `.env.local` and fill in your credentials.
+
+### Development
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Making a User an Admin
+## 🔑 Making a User an Admin
 
 To grant admin privileges to a user, run the following SQL command in your Supabase SQL editor:
 
@@ -32,17 +71,8 @@ WHERE email = 'user@example.com';
 
 Replace `user@example.com` with the email address of the user you want to make an admin.
 
-## Learn More
+## 📖 Documentation
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [TODO.md](TODO.md) - Project roadmap and task list
+- [PRD.md](PRD.md) - Product Requirements Document
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture and project structure

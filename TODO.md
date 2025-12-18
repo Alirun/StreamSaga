@@ -1,0 +1,47 @@
+Later
+- [ ] Fix: Search on mobile works well, shows only the results, allows to browse them without loosing the search result; Do that for desktop;
+- [ ] Feature: Downvote (add new prop to Vote table)
+- [ ] Feature: Admin: List users
+- [ ] Feature: Admin: Ban users
+- [ ] Ratelimit: Supabase: Database Size, Egress
+- [ ] Backups
+
+Done
+- [x] ARCHITECTURE.md or similar
+- [x] Try new idea about architecture updates rules
+- [x] Add `admin` role support for users with gated access to admin panel
+- [x] Add "Create Topic" feature
+- [x] Add "Search" feature for Topics during creation
+- [x] Upgrade React to safe version
+- [x] Add "Create Proposal" feature
+- [x] Add "Search" feature for Proposals during creation
+- [x] Add "Remove Proposal" feature
+- [x] Add "Vote" / "Unvote"
+- [x] Add "Approve Proposal" feature for admin that resolves the "Topic"
+- [x] Fix admin action "Archive Topic"
+- [x] Fix "Vote" functionality on the similar proposals window
+- [x] Research: Rate limits: embeddings, proposals, etc.
+- [x] Ratelimit: OpenAI (limit embeddings generation): per-user rate limit: Use Cloudflare internal rate limiter for embeddings generation
+- [x] Deploy
+- [x] Connect domain
+- [x] Change email confirmation to something more beautiful
+- [x] Only allow confirmed users to log in
+- [x] Research: Cache for the search or how to not hit the quotas of Supabase?
+- [x] Research how redirect links work: confirmation, reset, etc.
+- [x] Use /auth/callback for normal login to use ?code and apply session directly || OR Redirect user to log in page after sign up
+- [x] Sign in with Web3
+- [x] Reset password functionality (from UI / admin panel)
+- [x] Test functionality and fill the todo list
+- [x] Upgrade React to safe version again
+- [x] Connect SMTP server (resend.com)
+- [x] Feature: Sorting of the proposals on the Topic page
+- [x] Feature: Select the topic automatically when creating a proposal
+- [x] Feature: Generate random and deterministic avatars and usernames with animals
+- [x] Bug: Sign in to propose
+- [x] SEO stuff
+- [x] Change design to something more user friendly and browseable
+- [x] Mobile layout
+- [x] Feature: Search
+- [x] SEO: Change content: description, keywords, etc. Connect it explicitly to our stream now and make cross-reference
+- [x] SEO: Add OG, twitter images
+- [x] SEO: Add the analytics + cookies banner
